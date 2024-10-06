@@ -56,7 +56,7 @@ Pull requests are welcome. Please open an issue to discuss any changes.
 Every developer should create their own feature branch from main:
 
 ```bash
-git checkout -b [your-feature-name]
+git checkout -b [your-initials/your-feature-name]
 ``` 
 After completing a feature, submit a pull request to merge it into the main branch.
 Make sure to regularly pull the latest changes from main to avoid merge conflicts.
