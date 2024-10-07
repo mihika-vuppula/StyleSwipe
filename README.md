@@ -33,9 +33,9 @@ Amazon-style login screen: A simple and user-friendly login process.
 
 Tinder-style matching: Users can swipe to like or dislike clothing items (tops, bottoms, and shoes) and create matched outfits.
 
-Match outfits: Save liked items as an outfit to view later.
+Match outfits: Save liked items individually and as an outfit to view later.
 
-Filter by gender and price: Narrow down the clothing options based on your style and budget.
+Filters: Narrow down the clothing options based on your style,budget and preffered size.
 
 View and share matches: View saved outfits on a separate page, with the ability to share them via social media or messaging apps.
 
