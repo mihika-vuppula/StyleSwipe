@@ -36,13 +36,13 @@ export default function FilterModal({
           </View>
 
           <Text style={styles.filterLabel}>Department</Text>
-          {['Womens', 'Mens'].map(department => (
+          {['WOMENS', 'MENS'].map(department => (
             <TouchableOpacity
               key={department}
               style={styles.modalOption}
               onPress={() => toggleDepartment(department)}
             >
-              <Text>{department}</Text>
+              <Text>{department.charAt(0) + department.slice(1).toLowerCase()}</Text>
               <CheckIcon visible={selectedDepartments.includes(department)} />
             </TouchableOpacity>
           ))}
