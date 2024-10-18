@@ -29,7 +29,7 @@ export default function SwipeScreen() {
 
   // Fetch product data for tops, bottoms, and shoes categories
   const { product: topsProduct, loading: topsLoading, error: topsError } = useFetchRandomProduct([13317, 13332]);
-  const { product: bottomsProduct, loading: bottomsLoading, error: bottomsError } = useFetchRandomProduct([13281, 13297, 13302]);
+  const { product: bottomsProduct, loading: bottomsLoading, error: bottomsError } = useFetchRandomProduct([13281, 13297, 13302, 13377]);
   const { product: shoesProduct, loading: shoesLoading, error: shoesError } = useFetchRandomProduct([13438]);
 
   // Render the product box with dynamic data
@@ -46,13 +46,14 @@ export default function SwipeScreen() {
         ) : (
           product && (
             <Image
-              source={{ uri: product.imageUrl }}
-              style={[
+            source={{ uri: boxNumber === 3 ? product.imageUrl4 : product.imageUrl1 }}
+            style={[
                 styles.productImage, 
-                boxNumber === 2 && styles.secondProductImage
+                boxNumber === 2 && styles.secondProductImage,
+                boxNumber === 3 && { width: '80%', height: 'auto', aspectRatio: .8}
               ]}
               resizeMode={
-                boxNumber === 1 ? 'cover' : boxNumber === 2 ? undefined : 'contain'
+                boxNumber === 1 ? 'cover' : boxNumber === 3  ? 'stretch' : undefined
               }
             />          
           )
@@ -143,7 +144,7 @@ const styles = StyleSheet.create({
   box: {
     width: '60%',
     height: height / 4,
-    backgroundColor: '#EEEEED',  
+    backgroundColor: '#EAECEB',  
     borderRadius: 10,
     position: 'relative',
     justifyContent: 'center',
@@ -178,7 +179,7 @@ const styles = StyleSheet.create({
   productImage: {
     width: '100%',
     height: '100%',
-    borderRadius: 11,
+    borderRadius: 10,
   },
   secondProductImage: {
     width: '100%',

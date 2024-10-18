@@ -20,8 +20,9 @@ export function useFetchRandomProduct(categoryArray) {
           const randomProduct = products[Math.floor(Math.random() * products.length)];
           const productName = randomProduct.shortDescription;
           const productPrice = randomProduct.price.retail;
-          const imageUrl = `https://m.media-amazon.com/images/G/01/Shopbop/p${randomProduct.colors[0].images[0].src}`;
-          setProduct({ imageUrl, productName, productPrice });
+          const imageUrl1 = `https://m.media-amazon.com/images/G/01/Shopbop/p${randomProduct.colors[0].images[0].src}`;
+          const imageUrl4 = `https://m.media-amazon.com/images/G/01/Shopbop/p${randomProduct.colors[0].images[3].src}`;
+          setProduct({ imageUrl1, imageUrl4, productName, productPrice });
         }
       } catch (err) {
         setError(err);
