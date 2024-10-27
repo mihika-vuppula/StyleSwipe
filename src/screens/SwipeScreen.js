@@ -11,7 +11,6 @@ export default function SwipeScreen() {
   const [filterVisible, setFilterVisible] = useState(false);
   const [minPrice, setMinPrice] = useState('');
   const [maxPrice, setMaxPrice] = useState('');
-  const [selectedDepartments, setSelectedDepartments] = useState(['WOMENS', 'MENS']);
   
   const [topsRefresh, setTopsRefresh] = useState(0);
   const [bottomsRefresh, setBottomsRefresh] = useState(0);
@@ -62,9 +61,6 @@ export default function SwipeScreen() {
             />
           )
         )}
-        <TouchableOpacity style={styles.plusButton}>
-          <MaterialIcons name="add" size={16} color="white" />
-        </TouchableOpacity>
       </View>
       <TouchableOpacity style={styles.iconButton} onPress={() => refreshProduct(boxNumber)}>
         <MaterialIcons name="favorite" size={24} color={theme.positiveColor} />
@@ -95,8 +91,6 @@ export default function SwipeScreen() {
         maxPrice={maxPrice}
         setMinPrice={setMinPrice}
         setMaxPrice={setMaxPrice}
-        selectedDepartments={selectedDepartments}
-        toggleDepartment={toggleDepartment}
         clearFilters={clearFilters}
       />
     </SafeAreaView>
