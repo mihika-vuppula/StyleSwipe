@@ -52,14 +52,14 @@ export default function SwipeScreen() {
         ) : (
           product && (
             <Image
-              source={{ uri: boxNumber === 3 ? product.imageUrl4 : product.imageUrl1 }}
+              source={{ uri:product.imageUrl1 }}
               style={[
-                styles.productImage, 
-                boxNumber === 2 && styles.secondProductImage,
-                boxNumber === 3 && { width: '80%', height: 'auto', aspectRatio: .8}
+                styles.productImage,
+                boxNumber === 1 && styles.topImage,
+                boxNumber === 2 && styles.bottomImage,
+                boxNumber === 3 && styles.shoeImage
               ]}
-              resizeMode={boxNumber === 1 ? 'cover' : boxNumber === 3 ? 'stretch' : undefined}
-            />          
+            />
           )
         )}
         <TouchableOpacity style={styles.plusButton}>
@@ -183,11 +183,22 @@ const styles = StyleSheet.create({
   productImage: {
     width: '100%',
     height: '100%',
-    borderRadius: 10,
+    borderRadius: 10
   },
-  secondProductImage: {
+  topImage: {
     width: '100%',
-    height: '160%',  
-    alignSelf: 'flex-start',  
+    height: '120%', 
+    position: 'absolute',
+    top: '-10%',
+  },
+  bottomImage: {
+    width: '100%',
+    height: '120%', 
+    position: 'absolute',
+    top: '-5%', 
+  },
+  shoeImage: {
+    width: '100%',
+    height: '100%', 
   },
 });
