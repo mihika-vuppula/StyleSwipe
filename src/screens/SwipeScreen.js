@@ -12,6 +12,14 @@ export default function SwipeScreen() {
   const [minPrice, setMinPrice] = useState('');
   const [maxPrice, setMaxPrice] = useState('');
   const [selectedDepartments, setSelectedDepartments] = useState(['WOMENS', 'MENS']);
+  
+  const [topsRefresh, setTopsRefresh] = useState(0);
+  const [bottomsRefresh, setBottomsRefresh] = useState(0);
+  const [shoesRefresh, setShoesRefresh] = useState(0);
+
+  const { product: topsProduct, loading: topsLoading, error: topsError } = useFetchRandomProduct([13317, 13332], topsRefresh);
+  const { product: bottomsProduct, loading: bottomsLoading, error: bottomsError } = useFetchRandomProduct([13281, 13297, 13302, 13377], bottomsRefresh);
+  const { product: shoesProduct, loading: shoesLoading, error: shoesError } = useFetchRandomProduct([13438], shoesRefresh);
 
   const clearFilters = () => {
     setMinPrice('');
@@ -21,21 +29,19 @@ export default function SwipeScreen() {
 
   const toggleDepartment = (department) => {
     setSelectedDepartments((prev) =>
-      prev.includes(department)
-        ? prev.filter((d) => d !== department)
-        : [...prev, department]
+      prev.includes(department) ? prev.filter((d) => d !== department) : [...prev, department]
     );
   };
 
-  // Fetch product data for tops, bottoms, and shoes categories
-  const { product: topsProduct, loading: topsLoading, error: topsError } = useFetchRandomProduct([13317, 13332]);
-  const { product: bottomsProduct, loading: bottomsLoading, error: bottomsError } = useFetchRandomProduct([13281, 13297, 13302, 13377]);
-  const { product: shoesProduct, loading: shoesLoading, error: shoesError } = useFetchRandomProduct([13438]);
+  const refreshProduct = (boxNumber) => {
+    if (boxNumber === 1) setTopsRefresh((prev) => prev + 1);
+    if (boxNumber === 2) setBottomsRefresh((prev) => prev + 1);
+    if (boxNumber === 3) setShoesRefresh((prev) => prev + 1);
+  };
 
-  // Render the product box with dynamic data
   const renderProductBox = (product, loading, error, boxNumber) => (
     <View style={styles.boxContainer}>
-      <TouchableOpacity style={styles.iconButton}>
+      <TouchableOpacity style={styles.iconButton} onPress={() => refreshProduct(boxNumber)}>
         <MaterialIcons name="close" size={24} color={theme.negativeColor} />
       </TouchableOpacity>
       <View style={styles.box}>
@@ -46,15 +52,13 @@ export default function SwipeScreen() {
         ) : (
           product && (
             <Image
-            source={{ uri: boxNumber === 3 ? product.imageUrl4 : product.imageUrl1 }}
-            style={[
+              source={{ uri: boxNumber === 3 ? product.imageUrl4 : product.imageUrl1 }}
+              style={[
                 styles.productImage, 
                 boxNumber === 2 && styles.secondProductImage,
                 boxNumber === 3 && { width: '80%', height: 'auto', aspectRatio: .8}
               ]}
-              resizeMode={
-                boxNumber === 1 ? 'cover' : boxNumber === 3  ? 'stretch' : undefined
-              }
+              resizeMode={boxNumber === 1 ? 'cover' : boxNumber === 3 ? 'stretch' : undefined}
             />          
           )
         )}
@@ -62,7 +66,7 @@ export default function SwipeScreen() {
           <MaterialIcons name="add" size={16} color="white" />
         </TouchableOpacity>
       </View>
-      <TouchableOpacity style={styles.iconButton}>
+      <TouchableOpacity style={styles.iconButton} onPress={() => refreshProduct(boxNumber)}>
         <MaterialIcons name="favorite" size={24} color={theme.positiveColor} />
       </TouchableOpacity>
     </View>
