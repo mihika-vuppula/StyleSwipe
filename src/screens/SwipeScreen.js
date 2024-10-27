@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { View, Text, SafeAreaView, TouchableOpacity, StyleSheet, Dimensions } from 'react-native';
+import { View, Text, SafeAreaView, TouchableOpacity, StyleSheet, Dimensions, ActivityIndicator, Image } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import FilterModal from '../components/FilterModal';
 import { theme } from '../styles/Theme';
+import { useFetchRandomProduct } from '../hooks/useFetchProduct';
 
 const { height } = Dimensions.get('window');
 
@@ -26,12 +27,37 @@ export default function SwipeScreen() {
     );
   };
 
-  const renderBoxContainer = () => (
+  // Fetch product data for tops, bottoms, and shoes categories
+  const { product: topsProduct, loading: topsLoading, error: topsError } = useFetchRandomProduct([13317, 13332]);
+  const { product: bottomsProduct, loading: bottomsLoading, error: bottomsError } = useFetchRandomProduct([13281, 13297, 13302, 13377]);
+  const { product: shoesProduct, loading: shoesLoading, error: shoesError } = useFetchRandomProduct([13438]);
+
+  // Render the product box with dynamic data
+  const renderProductBox = (product, loading, error, boxNumber) => (
     <View style={styles.boxContainer}>
       <TouchableOpacity style={styles.iconButton}>
         <MaterialIcons name="close" size={24} color={theme.negativeColor} />
       </TouchableOpacity>
       <View style={styles.box}>
+        {loading ? (
+          <ActivityIndicator size="large" color={theme.primaryColor} />
+        ) : error ? (
+          <Text>Error loading product</Text>  
+        ) : (
+          product && (
+            <Image
+            source={{ uri: boxNumber === 3 ? product.imageUrl4 : product.imageUrl1 }}
+            style={[
+                styles.productImage, 
+                boxNumber === 2 && styles.secondProductImage,
+                boxNumber === 3 && { width: '80%', height: 'auto', aspectRatio: .8}
+              ]}
+              resizeMode={
+                boxNumber === 1 ? 'cover' : boxNumber === 3  ? 'stretch' : undefined
+              }
+            />          
+          )
+        )}
         <TouchableOpacity style={styles.plusButton}>
           <MaterialIcons name="add" size={16} color="white" />
         </TouchableOpacity>
@@ -51,12 +77,12 @@ export default function SwipeScreen() {
         </TouchableOpacity>
       </View>
       <View style={styles.middleContent}>
-        {renderBoxContainer()}
-        {renderBoxContainer()}
-        {renderBoxContainer()}
+        {renderProductBox(topsProduct, topsLoading, topsError, 1)} 
+        {renderProductBox(bottomsProduct, bottomsLoading, bottomsError, 2)}  
+        {renderProductBox(shoesProduct, shoesLoading, shoesError, 3)} 
       </View>
       <TouchableOpacity style={styles.button} onPress={() => {}}>
-        <Text style={styles.buttonText}>Create Outfit</Text>
+        <Text style={styles.buttonText}>Create Outfit</Text>  
       </TouchableOpacity>
       <FilterModal
         visible={filterVisible}
@@ -118,11 +144,12 @@ const styles = StyleSheet.create({
   box: {
     width: '60%',
     height: height / 4,
-    backgroundColor: '#CCCCCC',  
+    backgroundColor: '#EAECEB',  
     borderRadius: 10,
     position: 'relative',
     justifyContent: 'center',
     alignItems: 'center',
+    overflow: 'hidden', 
   },
   plusButton: {
     position: 'absolute',
@@ -148,5 +175,15 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: '#FFF',
     fontWeight: 'bold',
+  },
+  productImage: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 10,
+  },
+  secondProductImage: {
+    width: '100%',
+    height: '160%',  
+    alignSelf: 'flex-start',  
   },
 });
