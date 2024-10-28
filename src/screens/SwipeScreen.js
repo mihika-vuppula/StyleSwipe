@@ -23,13 +23,6 @@ export default function SwipeScreen() {
   const clearFilters = () => {
     setMinPrice('');
     setMaxPrice('');
-    setSelectedDepartments(['WOMENS', 'MENS']);
-  };
-
-  const toggleDepartment = (department) => {
-    setSelectedDepartments((prev) =>
-      prev.includes(department) ? prev.filter((d) => d !== department) : [...prev, department]
-    );
   };
 
   const refreshProduct = (boxNumber) => {
@@ -104,20 +97,22 @@ const styles = StyleSheet.create({
   },
   header: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    alignItems: 'center', 
     width: '100%',
-    paddingHorizontal: 20,
-    paddingVertical: 15,
-    paddingTop: 25,
-    backgroundColor: theme.secondaryColor,
+    paddingHorizontal: 30,
+    marginTop: 40, 
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
+    textAlign: 'center', 
+    flex: 1, 
   },
   filterIconButton: {
-    padding: 8,
+    padding: 6,
+    borderWidth: 1, 
+    borderColor: theme.primaryColor, 
+    borderRadius: 8, 
   },
   middleContent: {
     flex: 1,
@@ -137,7 +132,9 @@ const styles = StyleSheet.create({
     width: 50,
     height: 50,
     borderRadius: 25,
-    backgroundColor: theme.secondaryColor,
+    borderWidth: 1, 
+    borderColor: '#000000', 
+    borderRadius: 30,
   },
   box: {
     width: '60%',
@@ -148,17 +145,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     overflow: 'hidden', 
-  },
-  plusButton: {
-    position: 'absolute',
-    top: 8,
-    right: 8,
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    backgroundColor: theme.primaryColor,
-    justifyContent: 'center',
-    alignItems: 'center',
   },
   button: {
     paddingVertical: 15,

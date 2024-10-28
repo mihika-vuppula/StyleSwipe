@@ -11,7 +11,7 @@ export default function FilterModal({
     <Modal visible={visible} transparent={true} animationType="slide" onRequestClose={onClose}>
       <View style={styles.modalOverlay}>
         <View style={styles.filterPanel}>
-          <Text style={styles.modalTitle}>Filter Options</Text>
+          <Text style={styles.modalTitle}>Filters</Text>
 
           <View style={styles.priceInputs}>
             <TextInput
