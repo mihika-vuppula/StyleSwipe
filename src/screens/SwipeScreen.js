@@ -34,7 +34,7 @@ export default function SwipeScreen() {
   const renderProductBox = (product, loading, error, boxNumber) => (
     <View style={styles.boxContainer}>
       <TouchableOpacity style={styles.iconButton} onPress={() => refreshProduct(boxNumber)}>
-        <MaterialIcons name="close" size={24} color={theme.negativeColor} />
+        <MaterialIcons name="close" size={24} color={theme.primaryColor} />
       </TouchableOpacity>
       <View style={styles.box}>
         {loading ? (
@@ -56,7 +56,7 @@ export default function SwipeScreen() {
         )}
       </View>
       <TouchableOpacity style={styles.iconButton} onPress={() => refreshProduct(boxNumber)}>
-        <MaterialIcons name="favorite" size={24} color={theme.positiveColor} />
+        <MaterialIcons name="favorite" size={24} color={theme.primaryColor} />
       </TouchableOpacity>
     </View>
   );
@@ -111,7 +111,7 @@ const styles = StyleSheet.create({
   filterIconButton: {
     padding: 6,
     borderWidth: 1, 
-    borderColor: theme.primaryColor, 
+    borderColor: theme.secondaryColor, 
     borderRadius: 8, 
   },
   middleContent: {
@@ -133,7 +133,7 @@ const styles = StyleSheet.create({
     height: 50,
     borderRadius: 25,
     borderWidth: 1, 
-    borderColor: '#000000', 
+    borderColor: theme.primaryColor, 
     borderRadius: 30,
   },
   box: {
