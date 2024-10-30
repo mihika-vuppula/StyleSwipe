@@ -1,22 +1,17 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, TextInput, Modal } from 'react-native';
-import { MaterialIcons } from '@expo/vector-icons';
 import { theme } from '../styles/Theme';
 
-const CheckIcon = ({ visible }) => (
-  visible ? <MaterialIcons name="check" size={18} color={theme.primaryColor} /> : null
-);
 
 export default function FilterModal({
   visible, onClose, minPrice, maxPrice,
-  setMinPrice, setMaxPrice, selectedDepartments,
-  toggleDepartment, clearFilters
+  setMinPrice, setMaxPrice, clearFilters
 }) {
   return (
     <Modal visible={visible} transparent={true} animationType="slide" onRequestClose={onClose}>
       <View style={styles.modalOverlay}>
         <View style={styles.filterPanel}>
-          <Text style={styles.modalTitle}>Filter Options</Text>
+          <Text style={styles.modalTitle}>Filters</Text>
 
           <View style={styles.priceInputs}>
             <TextInput
@@ -33,19 +28,7 @@ export default function FilterModal({
               value={maxPrice}
               onChangeText={setMaxPrice}
             />
-          </View>
-
-          <Text style={styles.filterLabel}>Department</Text>
-          {['WOMENS', 'MENS'].map(department => (
-            <TouchableOpacity
-              key={department}
-              style={styles.modalOption}
-              onPress={() => toggleDepartment(department)}
-            >
-              <Text>{department.charAt(0) + department.slice(1).toLowerCase()}</Text>
-              <CheckIcon visible={selectedDepartments.includes(department)} />
-            </TouchableOpacity>
-          ))}
+          </View>  
 
           <TouchableOpacity onPress={clearFilters} style={styles.clearButton}>
             <Text style={styles.clearButtonText}>Clear Filters</Text>

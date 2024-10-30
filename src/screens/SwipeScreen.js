@@ -11,32 +11,30 @@ export default function SwipeScreen() {
   const [filterVisible, setFilterVisible] = useState(false);
   const [minPrice, setMinPrice] = useState('');
   const [maxPrice, setMaxPrice] = useState('');
-  const [selectedDepartments, setSelectedDepartments] = useState(['WOMENS', 'MENS']);
+  
+  const [topsRefresh, setTopsRefresh] = useState(0);
+  const [bottomsRefresh, setBottomsRefresh] = useState(0);
+  const [shoesRefresh, setShoesRefresh] = useState(0);
+
+  const { product: topsProduct, loading: topsLoading, error: topsError } = useFetchRandomProduct([13317, 13332], topsRefresh);
+  const { product: bottomsProduct, loading: bottomsLoading, error: bottomsError } = useFetchRandomProduct([13281, 13297, 13302, 13377], bottomsRefresh);
+  const { product: shoesProduct, loading: shoesLoading, error: shoesError } = useFetchRandomProduct([13438], shoesRefresh);
 
   const clearFilters = () => {
     setMinPrice('');
     setMaxPrice('');
-    setSelectedDepartments(['WOMENS', 'MENS']);
   };
 
-  const toggleDepartment = (department) => {
-    setSelectedDepartments((prev) =>
-      prev.includes(department)
-        ? prev.filter((d) => d !== department)
-        : [...prev, department]
-    );
+  const refreshProduct = (boxNumber) => {
+    if (boxNumber === 1) setTopsRefresh((prev) => prev + 1);
+    if (boxNumber === 2) setBottomsRefresh((prev) => prev + 1);
+    if (boxNumber === 3) setShoesRefresh((prev) => prev + 1);
   };
 
-  // Fetch product data for tops, bottoms, and shoes categories
-  const { product: topsProduct, loading: topsLoading, error: topsError } = useFetchRandomProduct([13317, 13332]);
-  const { product: bottomsProduct, loading: bottomsLoading, error: bottomsError } = useFetchRandomProduct([13281, 13297, 13302, 13377]);
-  const { product: shoesProduct, loading: shoesLoading, error: shoesError } = useFetchRandomProduct([13438]);
-
-  // Render the product box with dynamic data
   const renderProductBox = (product, loading, error, boxNumber) => (
     <View style={styles.boxContainer}>
-      <TouchableOpacity style={styles.iconButton}>
-        <MaterialIcons name="close" size={24} color={theme.negativeColor} />
+      <TouchableOpacity style={styles.iconButton} onPress={() => refreshProduct(boxNumber)}>
+        <MaterialIcons name="close" size={24} color={theme.primaryColor} />
       </TouchableOpacity>
       <View style={styles.box}>
         {loading ? (
@@ -46,24 +44,19 @@ export default function SwipeScreen() {
         ) : (
           product && (
             <Image
-            source={{ uri: boxNumber === 3 ? product.imageUrl4 : product.imageUrl1 }}
-            style={[
-                styles.productImage, 
-                boxNumber === 2 && styles.secondProductImage,
-                boxNumber === 3 && { width: '80%', height: 'auto', aspectRatio: .8}
+              source={{ uri:product.imageUrl1 }}
+              style={[
+                styles.productImage,
+                boxNumber === 1 && styles.topImage,
+                boxNumber === 2 && styles.bottomImage,
+                boxNumber === 3 && styles.shoeImage
               ]}
-              resizeMode={
-                boxNumber === 1 ? 'cover' : boxNumber === 3  ? 'stretch' : undefined
-              }
-            />          
+            />
           )
         )}
-        <TouchableOpacity style={styles.plusButton}>
-          <MaterialIcons name="add" size={16} color="white" />
-        </TouchableOpacity>
       </View>
-      <TouchableOpacity style={styles.iconButton}>
-        <MaterialIcons name="favorite" size={24} color={theme.positiveColor} />
+      <TouchableOpacity style={styles.iconButton} onPress={() => refreshProduct(boxNumber)}>
+        <MaterialIcons name="favorite" size={24} color={theme.primaryColor} />
       </TouchableOpacity>
     </View>
   );
@@ -91,8 +84,6 @@ export default function SwipeScreen() {
         maxPrice={maxPrice}
         setMinPrice={setMinPrice}
         setMaxPrice={setMaxPrice}
-        selectedDepartments={selectedDepartments}
-        toggleDepartment={toggleDepartment}
         clearFilters={clearFilters}
       />
     </SafeAreaView>
@@ -106,20 +97,22 @@ const styles = StyleSheet.create({
   },
   header: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    alignItems: 'center', 
     width: '100%',
-    paddingHorizontal: 20,
-    paddingVertical: 15,
-    paddingTop: 25,
-    backgroundColor: theme.secondaryColor,
+    paddingHorizontal: 30,
+    marginTop: 40, 
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
+    textAlign: 'center', 
+    flex: 1, 
   },
   filterIconButton: {
-    padding: 8,
+    padding: 6,
+    borderWidth: 1, 
+    borderColor: theme.secondaryColor, 
+    borderRadius: 8, 
   },
   middleContent: {
     flex: 1,
@@ -139,7 +132,9 @@ const styles = StyleSheet.create({
     width: 50,
     height: 50,
     borderRadius: 25,
-    backgroundColor: theme.secondaryColor,
+    borderWidth: 1, 
+    borderColor: theme.primaryColor, 
+    borderRadius: 30,
   },
   box: {
     width: '60%',
@@ -150,17 +145,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     overflow: 'hidden', 
-  },
-  plusButton: {
-    position: 'absolute',
-    top: 8,
-    right: 8,
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    backgroundColor: theme.primaryColor,
-    justifyContent: 'center',
-    alignItems: 'center',
   },
   button: {
     paddingVertical: 15,
@@ -179,11 +163,22 @@ const styles = StyleSheet.create({
   productImage: {
     width: '100%',
     height: '100%',
-    borderRadius: 10,
+    borderRadius: 10
   },
-  secondProductImage: {
+  topImage: {
     width: '100%',
-    height: '160%',  
-    alignSelf: 'flex-start',  
+    height: '120%', 
+    position: 'absolute',
+    top: '-10%',
+  },
+  bottomImage: {
+    width: '100%',
+    height: '120%', 
+    position: 'absolute',
+    top: '-5%', 
+  },
+  shoeImage: {
+    width: '100%',
+    height: '100%', 
   },
 });

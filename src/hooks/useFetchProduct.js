@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 
-export function useFetchRandomProduct(categoryArray) {
+export function useFetchRandomProduct(categoryArray, refreshTrigger) {
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -10,10 +10,8 @@ export function useFetchRandomProduct(categoryArray) {
       try {
         setLoading(true);
         const randomCategory = categoryArray[Math.floor(Math.random() * categoryArray.length)];
-        console.log("Fetching category:", randomCategory);
         const response = await fetch(`https://api.shopbop.com/categories/${randomCategory}/products`);
         const data = await response.json();
-        console.log("Fetched data:", data);
         const products = data.products;
         
         if (products && products.length > 0) {
@@ -32,7 +30,7 @@ export function useFetchRandomProduct(categoryArray) {
     }
 
     fetchProduct();
-  }, []);
+  }, [refreshTrigger]);
 
-  return { product, loading, error};
+  return { product, loading, error };
 }
