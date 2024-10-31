@@ -9,19 +9,20 @@ export function useFetchRandomProduct(categoryArray, refreshTrigger) {
     async function fetchProduct() {
       try {
         setLoading(true);
-        const randomCategory = categoryArray[Math.floor(Math.random() * categoryArray.length)];
-        const response = await fetch(`https://api.shopbop.com/categories/${randomCategory}/products`);
-        const data = await response.json();
-        const products = data.products;
-        
-        if (products && products.length > 0) {
-          const randomProduct = products[Math.floor(Math.random() * products.length)];
-          const productName = randomProduct.shortDescription;
-          const productPrice = randomProduct.price.retail;
-          const imageUrl1 = `https://m.media-amazon.com/images/G/01/Shopbop/p${randomProduct.colors[0].images[0].src}`;
-          const imageUrl4 = `https://m.media-amazon.com/images/G/01/Shopbop/p${randomProduct.colors[0].images[3].src}`;
-          setProduct({ imageUrl1, imageUrl4, productName, productPrice });
+        const response = await fetch(`https://io3mb1av2d.execute-api.us-east-1.amazonaws.com/dev/products`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ categoryArray }), // Send categoryArray as JSON
+        });
+
+        if (!response.ok) {
+          throw new Error(`Error: ${response.status}`);
         }
+
+        const data = await response.json();
+        setProduct(data);
       } catch (err) {
         setError(err);
       } finally {
@@ -30,7 +31,7 @@ export function useFetchRandomProduct(categoryArray, refreshTrigger) {
     }
 
     fetchProduct();
-  }, [refreshTrigger]);
+  }, [refreshTrigger, categoryArray]);
 
   return { product, loading, error };
 }
