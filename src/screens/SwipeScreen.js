@@ -138,7 +138,7 @@ const styles = StyleSheet.create({
   },
   box: {
     width: '60%',
-    height: height / 4,
+    height: height / 4.5,
     backgroundColor: '#EAECEB',  
     borderRadius: 10,
     position: 'relative',
@@ -152,7 +152,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: 10,
-    marginHorizontal: 20,
+    marginHorizontal: 40,
     marginBottom: 20,
   },
   buttonText: {
