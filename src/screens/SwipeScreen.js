@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { View, Text, SafeAreaView, TouchableOpacity, StyleSheet, Dimensions, ActivityIndicator, Image } from 'react-native';
+import React, { useState, useRef } from 'react';
+import { View, Text, SafeAreaView, TouchableOpacity, StyleSheet, Dimensions, ActivityIndicator, Image, Animated } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import FilterModal from '../components/FilterModal';
 import { theme } from '../styles/Theme';
@@ -11,10 +11,14 @@ export default function SwipeScreen() {
   const [filterVisible, setFilterVisible] = useState(false);
   const [minPrice, setMinPrice] = useState('');
   const [maxPrice, setMaxPrice] = useState('');
-  
+  const [popupVisible, setPopupVisible] = useState(false);
+  const [popupMessage, setPopupMessage] = useState(''); // State for popup message
+
   const [topsRefresh, setTopsRefresh] = useState(0);
   const [bottomsRefresh, setBottomsRefresh] = useState(0);
   const [shoesRefresh, setShoesRefresh] = useState(0);
+
+  const slideAnim = useRef(new Animated.Value(Dimensions.get('window').width)).current;
 
   const { product: topsProduct, loading: topsLoading, error: topsError } = useFetchRandomProduct([13317, 13332], topsRefresh);
   const { product: bottomsProduct, loading: bottomsLoading, error: bottomsError } = useFetchRandomProduct([13281, 13297, 13302, 13377], bottomsRefresh);
@@ -31,6 +35,31 @@ export default function SwipeScreen() {
     if (boxNumber === 3) setShoesRefresh((prev) => prev + 1);
   };
 
+  const showPopup = (message) => {
+    setPopupMessage(message);
+    setPopupVisible(true);
+    slideAnim.setValue(Dimensions.get('window').width);
+
+    Animated.timing(slideAnim, {
+      toValue: 0,
+      duration: 300,
+      useNativeDriver: true,
+    }).start();
+
+    setTimeout(() => {
+      setPopupVisible(false);
+    }, 2000); // Hide popup after 2 seconds
+  };
+
+  const handleHeartPress = (boxNumber) => {
+    refreshProduct(boxNumber);
+    showPopup("YAY! Item Added To Your Fits");
+  };
+
+  const handleCreateOutfitPress = () => {
+    showPopup("YAY! Outfit Added To Your Fits");
+  };
+
   const renderProductBox = (product, loading, error, boxNumber) => (
     <View style={styles.boxContainer}>
       <TouchableOpacity style={styles.iconButton} onPress={() => refreshProduct(boxNumber)}>
@@ -44,7 +73,7 @@ export default function SwipeScreen() {
         ) : (
           product && (
             <Image
-              source={{ uri:product.imageUrl1 }}
+              source={{ uri: product.imageUrl1 }}
               style={[
                 styles.productImage,
                 boxNumber === 1 && styles.topImage,
@@ -55,7 +84,7 @@ export default function SwipeScreen() {
           )
         )}
       </View>
-      <TouchableOpacity style={styles.iconButton} onPress={() => refreshProduct(boxNumber)}>
+      <TouchableOpacity style={styles.iconButton} onPress={() => handleHeartPress(boxNumber)}>
         <MaterialIcons name="favorite" size={24} color={theme.primaryColor} />
       </TouchableOpacity>
     </View>
@@ -74,7 +103,7 @@ export default function SwipeScreen() {
         {renderProductBox(bottomsProduct, bottomsLoading, bottomsError, 2)}  
         {renderProductBox(shoesProduct, shoesLoading, shoesError, 3)} 
       </View>
-      <TouchableOpacity style={styles.button} onPress={() => {}}>
+      <TouchableOpacity style={styles.button} onPress={handleCreateOutfitPress}>
         <Text style={styles.buttonText}>Create Outfit</Text>  
       </TouchableOpacity>
       <FilterModal
@@ -86,6 +115,12 @@ export default function SwipeScreen() {
         setMaxPrice={setMaxPrice}
         clearFilters={clearFilters}
       />
+      {popupVisible && (
+        <Animated.View style={[styles.popup, { transform: [{ translateX: slideAnim }] }]}>
+          <MaterialIcons name="favorite" size={24} color={theme.primaryColor} />
+          <Text style={styles.popupText}>{popupMessage}</Text>
+        </Animated.View>
+      )}
     </SafeAreaView>
   );
 }
@@ -180,5 +215,28 @@ const styles = StyleSheet.create({
   shoeImage: {
     width: '100%',
     height: '100%', 
+  },
+  popup: {
+    position: 'absolute',
+    alignSelf: 'center',
+    top: '40%',
+    backgroundColor: '#fff',
+    borderRadius: 20,
+    borderWidth: 2,
+    borderColor: theme.primaryColor,
+    padding: 15,
+    flexDirection: 'row',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  popupText: {
+    marginLeft: 10,
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: theme.primaryColor,
   },
 });
