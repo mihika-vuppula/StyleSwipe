@@ -6,85 +6,46 @@ export function useFetchRandomProduct(categoryArray, refreshTrigger) {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    let isMounted = true;
-    
     async function fetchProduct() {
       try {
         setLoading(true);
-        const randomCategory = categoryArray[Math.floor(Math.random() * categoryArray.length)];
+
+        const API_URL = "https://hzka2ob147.execute-api.us-east-1.amazonaws.com/dev/get_outfit_data";
         
-        // Add timestamp and random string to ensure different products
-        const timestamp = Date.now();
-        const randomString = Math.random().toString(36).substring(7);
-        
-        const productResponse = await fetch('https://io3mb1av2d.execute-api.us-east-1.amazonaws.com/dev/products', {
-          method: 'POST',
+        const response = await fetch(API_URL, {
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            categoryArray: [randomCategory],
-            timestamp: timestamp,
-            randomSeed: randomString
-          })
+            categoryArray: categoryArray, 
+          }),
         });
 
-        if (!productResponse.ok) {
-          throw new Error('Failed to fetch product data');
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
         }
 
-        const productData = await productResponse.json();
+        const data = await response.json();
         
-        if (productData && productData.body) {
-          const parsedData = typeof productData.body === 'string' ? JSON.parse(productData.body) : productData.body;
-
-          // Generate unique image keys with category and product info
-          const imageKey1 = `product-images/${randomCategory}/${timestamp}_${randomString}_1.jpg`;
-          const imageKey4 = `product-images/${randomCategory}/${timestamp}_${randomString}_4.jpg`;
-
-          // Cache the images with organized keys
-          await fetch('https://io3mb1av2d.execute-api.us-east-1.amazonaws.com/dev/cache-images', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              imageUrl1: parsedData.imageUrl1,
-              imageUrl4: parsedData.imageUrl4,
-              imageKey1: imageKey1,
-              imageKey4: imageKey4
-            })
-          });
-
-          if (isMounted) {
-            setProduct({
-              ...parsedData,
-              imageKey1,
-              imageKey4
-            });
-          }
-        }
+        setProduct({
+          imageUrl1: data.imageUrls[0], 
+          imageUrl4: data.imageUrls[1], 
+          productName: data.productName,
+          designerName: data.designerName,
+          productPrice: data.productPrice,
+          productId: data.productId,
+        });
       } catch (err) {
-        console.error('Error fetching product:', err);
-        if (isMounted) {
-          setError(err);
-        }
+        console.error("Error fetching product:", err);
+        setError(err.message);
       } finally {
-        if (isMounted) {
-          setLoading(false);
-        }
+        setLoading(false);
       }
     }
 
-    const timeoutId = setTimeout(() => {
-      fetchProduct();
-    }, 300);
-
-    return () => {
-      isMounted = false;
-      clearTimeout(timeoutId);
-    };
-  }, [refreshTrigger]);
+    fetchProduct();
+  }, [categoryArray, refreshTrigger]);
 
   return { product, loading, error };
 }
