@@ -17,10 +17,12 @@ export function useFetchRandomProduct(categoryArray, refreshTrigger) {
         if (products && products.length > 0) {
           const randomProduct = products[Math.floor(Math.random() * products.length)];
           const productName = randomProduct.shortDescription;
+          const designerName = randomProduct.designerName;
           const productPrice = randomProduct.price.retail;
           const imageUrl1 = `https://m.media-amazon.com/images/G/01/Shopbop/p${randomProduct.colors[0].images[0].src}`;
           const imageUrl4 = `https://m.media-amazon.com/images/G/01/Shopbop/p${randomProduct.colors[0].images[3].src}`;
-          setProduct({ imageUrl1, imageUrl4, productName, productPrice });
+
+          setProduct({ imageUrl1, imageUrl4, productName, designerName, productPrice });
         }
       } catch (err) {
         setError(err);
