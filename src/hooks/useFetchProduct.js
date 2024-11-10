@@ -45,7 +45,7 @@ export function useFetchRandomProduct(categoryArray, refreshTrigger) {
     }
 
     fetchProduct();
-  }, [categoryArray, refreshTrigger]);
+  }, [refreshTrigger]);
 
   return { product, loading, error };
 }
