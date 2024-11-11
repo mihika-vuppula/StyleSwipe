@@ -1,0 +1,34 @@
+[
+    {
+        "itemId": "item1",
+        "category": "top",
+        "designerName": "English Factory",
+        "productName": "Knit Striped Sweater Cardigan",
+        "productPrice": "$120.00",
+        "imageUrl": "https://m.media-amazon.com/images/G/01/Shopbop/p/prod/products/efact/efact3089212822/efact3089212822_1700508820932_2-0.jpg"
+    },
+    {
+        "itemId": "item2",
+        "category": "bottom",
+        "designerName": "La Ligne",
+        "productName": "Marilyn Jeans",
+        "productPrice": "$225.00",
+        "imageUrl": "https://m.media-amazon.com/images/G/01/Shopbop/p/prod/products/lalig/lalig3013412580/lalig3013412580_1730473730237_2-0.jpg"
+    },
+    {
+        "itemId": "item3",
+        "category": "shoes",
+        "designerName": "Tory Burch",
+        "productName": "Cap Toe Ballet Flats",
+        "productPrice": "$278.00",
+        "imageUrl": "https://m.media-amazon.com/images/G/01/Shopbop/p/prod/products/toryb/toryb5078122ce6/toryb5078122ce6_1730930836883_2-0.jpg"
+    },
+    {
+        "itemId": "item4",
+        "category": "top",
+        "designerName": "Vince",
+        "productName": "Abstract Onyx Jacquard Mock Neck",
+        "productPrice": "$495.00",
+        "imageUrl": "https://m.media-amazon.com/images/G/01/Shopbop/p/prod/products/vince/vince5271023cc2/vince5271023cc2_1730999630044_2-0.jpg"
+    }
+]
