@@ -14,11 +14,11 @@ export default function ItemCard({ item, cardWidth }) {
                     <Text style={styles.productName}>{item.productName}</Text>
                 </View>
             </View>
-            <View style={styles.buttonsContainer}>
-                <TouchableOpacity style={styles.detailsButton}>
-                    <Text style={styles.detailsButtonText}>Details</Text>
+            <View style={theme.buttonsContainer}>
+                <TouchableOpacity style={theme.detailsButton}>
+                    <Text style={theme.detailsButtonText}>Details</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.shareButton}>
+                <TouchableOpacity style={theme.shareButton}>
                     <MaterialCommunityIcons name="share-outline" size={20} color="#333" />
                 </TouchableOpacity>
             </View>
@@ -56,34 +56,6 @@ const styles = StyleSheet.create({
     productName: {
         color: '#FFF',
         fontSize: 10,
-    },
-    buttonsContainer: {
-        flexDirection: 'row',
-        justifyContent: 'space-around',
-        paddingVertical: 10,
-        width: '100%',
-    },
-    detailsButton: {
-        borderWidth: 1,
-        borderColor: theme.secondaryColor,
-        paddingVertical: 6,
-        paddingHorizontal: 20,
-        borderRadius: 20,
-        alignItems: 'center',
-        flex: 1,
-        marginRight: 8,
-    },
-    detailsButtonText: {
-        fontSize: 12,
-        fontWeight: 'bold',
-    },
-    shareButton: {
-        borderWidth: 1,
-        borderColor: theme.secondaryColor,
-        padding: 6,
-        borderRadius: 20,
-        alignItems: 'center',
-        justifyContent: 'center',
     },
 });
 

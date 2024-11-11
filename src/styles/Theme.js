@@ -28,5 +28,33 @@ export const theme = {
         borderColor: secondaryColor,
         borderRadius: 8,
     },
+    buttonsContainer: {
+      flexDirection: 'row',
+      justifyContent: 'space-around',
+      paddingVertical: 10,
+      width: '100%',
+  },
+  detailsButton: {
+      borderWidth: 1,
+      borderColor: secondaryColor,
+      paddingVertical: 6,
+      paddingHorizontal: 20,
+      borderRadius: 20,
+      alignItems: 'center',
+      flex: 1,
+      marginRight: 8,
+  },
+  detailsButtonText: {
+      fontSize: 12,
+      fontWeight: 'bold',
+  },
+  shareButton: {
+      borderWidth: 1,
+      borderColor: secondaryColor,
+      padding: 6,
+      borderRadius: 20,
+      alignItems: 'center',
+      justifyContent: 'center',
+  },
 };
   
