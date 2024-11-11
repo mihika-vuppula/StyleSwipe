@@ -9,10 +9,6 @@ export default function ItemCard({ item, cardWidth }) {
         <View style={[styles.cardContainer, { width: cardWidth }]}>
             <View style={styles.imageContainer}>
                 <Image source={{ uri: item.imageUrl }} style={[styles.image, { width: cardWidth - 2 }]} />
-                <View style={styles.overlay}>
-                    <Text style={styles.designerName}>{item.designerName}</Text>
-                    <Text style={styles.productName}>{item.productName}</Text>
-                </View>
             </View>
             <View style={theme.buttonsContainer}>
                 <TouchableOpacity style={theme.detailsButton}>
@@ -39,23 +35,6 @@ const styles = StyleSheet.create({
     image: {
         height: 195,
         resizeMode: 'cover',
-    },
-    overlay: {
-        position: 'absolute',
-        bottom: 0,
-        width: '100%',
-        padding: 8,
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
-        alignItems: 'center',
-    },
-    designerName: {
-        color: '#FFF',
-        fontSize: 12,
-        fontWeight: 'bold',
-    },
-    productName: {
-        color: '#FFF',
-        fontSize: 10,
     },
 });
 
