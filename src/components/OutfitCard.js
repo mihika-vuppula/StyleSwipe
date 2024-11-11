@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Image, StyleSheet, Text, TouchableOpacity } from 'react-native';
-import { MaterialIcons } from '@expo/vector-icons';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { theme } from '../styles/Theme';
 
 export default function OutfitCard({ outfit, cardWidth }) {
@@ -26,7 +26,7 @@ export default function OutfitCard({ outfit, cardWidth }) {
                     <Text style={styles.detailsButtonText}>Details</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.shareButton}>
-                    <MaterialIcons name="share" size={20} color="#333" />
+                    <MaterialCommunityIcons name="share-outline" size={20} color="#333" />
                 </TouchableOpacity>
             </View>
         </View>

@@ -1,7 +1,7 @@
 // ItemCard.js
 import React from 'react';
 import { View, Image, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { MaterialIcons } from '@expo/vector-icons';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { theme } from '../styles/Theme';
 
 export default function ItemCard({ item, cardWidth }) {
@@ -19,7 +19,7 @@ export default function ItemCard({ item, cardWidth }) {
                     <Text style={styles.detailsButtonText}>Details</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.shareButton}>
-                    <MaterialIcons name="share" size={20} color="#333" />
+                    <MaterialCommunityIcons name="share-outline" size={20} color="#333" />
                 </TouchableOpacity>
             </View>
         </View>
