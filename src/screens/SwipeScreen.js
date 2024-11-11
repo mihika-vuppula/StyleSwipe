@@ -100,10 +100,10 @@ export default function SwipeScreen() {
   );
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>For You</Text>
-        <TouchableOpacity onPress={() => setFilterVisible(true)} style={styles.filterIconButton}>
+    <SafeAreaView style={theme.container}>
+      <View style={theme.header}>
+        <Text style={theme.title}>For You</Text>
+        <TouchableOpacity onPress={() => setFilterVisible(true)} style={theme.topButton}>
           <MaterialIcons name="filter-list" size={24} color={theme.primaryColor} />
         </TouchableOpacity>
       </View>
@@ -135,28 +135,6 @@ export default function SwipeScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 30,
-    marginTop: 40,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    flex: 1,
-  },
-  filterIconButton: {
-    padding: 6,
-    borderWidth: 1,
-    borderColor: theme.secondaryColor,
-    borderRadius: 8,
-  },
   middleContent: {
     flex: 1,
     justifyContent: 'space-evenly',

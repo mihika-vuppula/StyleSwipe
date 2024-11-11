@@ -1,0 +1,90 @@
+[
+    {
+      "matchId": {
+        "S": "OUTFIT001"
+      },
+      "top": {
+        "M": {
+          "designerName": { "S": "Sea" },
+          "productName": { "S": "Myra Cotton Combo Short Sleeve Top" },
+          "productPrice": { "S": "$185.00" },
+          "imageUrl": { "S": "https://m.media-amazon.com/images/G/01/Shopbop/p/prod/products/seaaa/seaaa2228010d92/seaaa2228010d92_1730467560929_2-0.jpg" }
+        }
+      },
+      "bottom": {
+        "M": {
+          "designerName": { "S": "adidas" },
+          "productName": { "S": "Adidas x Wales Bonner Track Pants" },
+          "productPrice": { "S": "$250.00" },
+          "imageUrl": { "S": "https://m.media-amazon.com/images/G/01/Shopbop/p/prod/products/addas/addas3050799037/addas3050799037_1730306804615_2-0.jpg" }
+        }
+      },
+      "shoes": {
+        "M": {
+          "designerName": { "S": "Dr. Martens" },
+          "productName": { "S": "Maybole Chelsea Boots" },
+          "productPrice": { "S": "$190.00" },
+          "imageUrl": { "S": "https://m.media-amazon.com/images/G/01/Shopbop/p/prod/products/drmar/drmar307541071b/drmar307541071b_1730134382487_2-0.jpg" }
+        }
+      }
+    },
+    {
+      "matchId": {
+        "S": "OUTFIT002"
+      },
+      "top": {
+        "M": {
+          "designerName": { "S": "Zimmermann" },
+          "productName": { "S": "Crush Necklace Sweater" },
+          "productPrice": { "S": "$695.00" },
+          "imageUrl": { "S": "https://m.media-amazon.com/images/G/01/Shopbop/p/prod/products/zimme/zimme4320622b0d/zimme4320622b0d_1730995814484_2-0.jpg" }
+        }
+      },
+      "bottom": {
+        "M": {
+          "designerName": { "S": "BLANKNYC" },
+          "productName": { "S": "Black Coffee Skirt" },
+          "productPrice": { "S": "$168.00" },
+          "imageUrl": { "S": "https://m.media-amazon.com/images/G/01/Shopbop/p/prod/products/blank/blank4117916324/blank4117916324_1728315909641_2-0.jpg" }
+        }
+      },
+      "shoes": {
+        "M": {
+          "designerName": { "S": "Ulla Johnson" },
+          "productName": { "S": "Elise Ruffle Ballet Flats" },
+          "productPrice": { "S": "$475.00" },
+          "imageUrl": { "S": "https://m.media-amazon.com/images/G/01/Shopbop/p/prod/products/ullaj/ullaj2277520478/ullaj2277520478_1730492717893_2-0.jpg" }
+        }
+      }
+    },
+    {
+        "matchId": {
+          "S": "OUTFIT003"
+        },
+        "top": {
+          "M": {
+            "designerName": { "S": "Free People" },
+            "productName": { "S": "Found My Friend Cardi" },
+            "productPrice": { "S": "$78.00" },
+            "imageUrl": { "S": "https://m.media-amazon.com/images/G/01/Shopbop/p/prod/products/freep/freep4547010d92/freep4547010d92_1628519281921_2-0.jpg" }
+          }
+        },
+        "bottom": {
+          "M": {
+            "designerName": { "S": "FRAME" },
+            "productName": { "S": "Le Slim Palazzo Bardot Pocket Jeans" },
+            "productPrice": { "S": "$298.00" },
+            "imageUrl": { "S": "https://m.media-amazon.com/images/G/01/Shopbop/p/prod/products/frame/frame32765237e1/frame32765237e1_1730211958071_2-0.jpg" }
+          }
+        },
+        "shoes": {
+          "M": {
+            "designerName": { "S": "STAUD" },
+            "productName": { "S": "Alba Ballet Flats" },
+            "productPrice": { "S": "$450.00" },
+            "imageUrl": { "S": "https://m.media-amazon.com/images/G/01/Shopbop/p/prod/products/staud/staud3228412984/staud3228412984_1730483571111_2-0.jpg" }
+          }
+        }
+    }
+  ]
+  
