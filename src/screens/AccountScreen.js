@@ -26,7 +26,7 @@ export default function AccountScreen({navigation}) {
 
     const selectImage = (uri) => {
         setSelectedImage(uri);
-        setAvatarOptionsVisible(false); // Close options after selection
+        setAvatarOptionsVisible(false); 
     };
 
     const handleSaveChanges = () => {
@@ -35,14 +35,12 @@ export default function AccountScreen({navigation}) {
             return;
         }
         
-        // Update only the display name
         setDisplayName(name);
         
-        // Show success message
         Alert.alert("Success", "Profile updated successfully!");
     };
 
-    // Rest of the JSX remains the same, just remove any originalImage related code
+   
     return (
         <View style={theme.container}>
             {/* Header */}
@@ -167,7 +165,6 @@ const styles = StyleSheet.create({
     selectedOptionImage: {
         borderColor: theme.primaryColor,
         borderWidth: 3,
-        // Optional: add a subtle shadow or other visual indicator
         shadowColor: theme.primaryColor,
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.4,
