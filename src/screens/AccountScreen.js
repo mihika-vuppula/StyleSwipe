@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { View, Text, Image, TouchableOpacity, FlatList, TextInput, StyleSheet, Alert } from 'react-native';
+import { View, Text, Image, TouchableOpacity, Pressable, FlatList, TextInput, StyleSheet, Alert } from 'react-native';
 import { theme } from '../styles/Theme';
 import { MaterialIcons } from '@expo/vector-icons';
 
@@ -26,7 +26,7 @@ export default function AccountScreen({navigation}) {
 
     const selectImage = (uri) => {
         setSelectedImage(uri);
-        setAvatarOptionsVisible(false); 
+        setAvatarOptionsVisible(false);
     };
 
     const handleSaveChanges = () => {
@@ -34,13 +34,10 @@ export default function AccountScreen({navigation}) {
             Alert.alert("Error", "Please enter your name");
             return;
         }
-        
         setDisplayName(name);
-        
         Alert.alert("Success", "Profile updated successfully!");
     };
 
-   
     return (
         <View style={theme.container}>
             {/* Header */}
@@ -103,15 +100,21 @@ export default function AccountScreen({navigation}) {
                                 snapToInterval={100}
                                 decelerationRate="fast"
                                 renderItem={({ item }) => (
-                                    <TouchableOpacity 
+                                    <Pressable 
                                         onPress={() => selectImage(item.uri)}
-                                        style={styles.avatarOptionContainer}
+                                        style={({ pressed }) => [
+                                            styles.avatarOptionContainer,
+                                            pressed && styles.pressed
+                                        ]}
                                     >
                                         <Image 
                                             source={{ uri: item.uri }} 
-                                            style={styles.optionImage}
+                                            style={[
+                                                styles.optionImage,
+                                                selectedImage === item.uri && styles.selectedOptionImage
+                                            ]}
                                         />
-                                    </TouchableOpacity>
+                                    </Pressable>
                                 )}
                                 contentContainerStyle={styles.avatarList}
                             />
@@ -162,14 +165,6 @@ const styles = StyleSheet.create({
         paddingHorizontal: 20,
         paddingVertical: 10,
     },
-    selectedOptionImage: {
-        borderColor: theme.primaryColor,
-        borderWidth: 3,
-        shadowColor: theme.primaryColor,
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.4,
-        shadowRadius: 3,
-    },
     title: {
         fontSize: 28,
         fontWeight: 'bold',
@@ -185,8 +180,8 @@ const styles = StyleSheet.create({
         overflow: 'hidden',
         width: '150%',
         height: 200,
-        borderBottomLeftRadius: 180,
-        borderBottomRightRadius: 180,
+        borderBottomLeftRadius: 190,
+        borderBottomRightRadius: 190,
         position: 'absolute',
         top: 0,
         left: '-25%',
@@ -254,18 +249,33 @@ const styles = StyleSheet.create({
     },
     avatarOptionContainer: {
         marginHorizontal: 5,
+        borderRadius: 45,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.2,
+        shadowRadius: 2,
+        elevation: 2,
     },
     optionImage: {
         width: 90,
         height: 90,
         borderRadius: 45,
         borderWidth: 2,
-        borderColor: theme.primaryColor,
+        borderColor: 'transparent', 
+    },
+    selectedOptionImage: {
+        borderColor: theme.primaryColor, 
+        borderWidth: 2,
+    },
+    pressed: {
+        opacity: 0.8,
+        transform: [{ scale: 0.98 }], 
     },
     formSection: {
         paddingTop: 20,
         width: '100%',
         flex: 1,
+        justifyContent: 'space-between',
     },
     inputContainer: {
         flexDirection: 'row',
@@ -308,7 +318,8 @@ const styles = StyleSheet.create({
         borderRadius: 8,
         paddingHorizontal: 15,
         marginHorizontal: 20,
-        marginTop: 45,
+        marginTop: 'auto',
+        marginBottom: 40,
         height: 50,
     },
     logoutButtonText: {
