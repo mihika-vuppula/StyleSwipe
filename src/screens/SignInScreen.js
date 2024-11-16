@@ -36,7 +36,10 @@ export default function SignInScreen({ navigation }) {
 
         console.log('API Response:', response.data);
         console.log(`UserID ${userId} stored successfully`);
-        navigation.navigate('SwipeScreen', { userName: name });
+        navigation.navigate('Main', {
+          screen: 'Swipe',
+          params: { userName: name },
+        });
       } catch (error) {
         console.error('Error storing UserID:', error);
         Alert.alert('Error', 'Failed to store user data. Please try again.');

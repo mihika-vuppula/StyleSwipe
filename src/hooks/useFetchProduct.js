@@ -9,21 +9,36 @@ export function useFetchRandomProduct(categoryArray, refreshTrigger) {
     async function fetchProduct() {
       try {
         setLoading(true);
-        const randomCategory = categoryArray[Math.floor(Math.random() * categoryArray.length)];
-        const response = await fetch(`https://api.shopbop.com/categories/${randomCategory}/products`);
-        const data = await response.json();
-        const products = data.products;
+
+        const API_URL = "https://hzka2ob147.execute-api.us-east-1.amazonaws.com/dev/get_outfit_data";
         
-        if (products && products.length > 0) {
-          const randomProduct = products[Math.floor(Math.random() * products.length)];
-          const productName = randomProduct.shortDescription;
-          const productPrice = randomProduct.price.retail;
-          const imageUrl1 = `https://m.media-amazon.com/images/G/01/Shopbop/p${randomProduct.colors[0].images[0].src}`;
-          const imageUrl4 = `https://m.media-amazon.com/images/G/01/Shopbop/p${randomProduct.colors[0].images[3].src}`;
-          setProduct({ imageUrl1, imageUrl4, productName, productPrice });
+        const response = await fetch(API_URL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            categoryArray: categoryArray, 
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
         }
+
+        const data = await response.json();
+        
+        setProduct({
+          imageUrl1: data.imageUrls[0], 
+          imageUrl4: data.imageUrls[1], 
+          productName: data.productName,
+          designerName: data.designerName,
+          productPrice: data.productPrice,
+          productId: data.productId,
+        });
       } catch (err) {
-        setError(err);
+        console.error("Error fetching product:", err);
+        setError(err.message);
       } finally {
         setLoading(false);
       }
