@@ -1,3 +1,5 @@
+// src/screens/SignInScreen.js
+
 import axios from 'axios';
 import React, { useState } from 'react';
 import {
@@ -10,6 +12,7 @@ import {
   Alert,
   Dimensions,
 } from 'react-native';
+import { theme } from '../styles/Theme'; // Import the theme
 
 const { width } = Dimensions.get('window');
 
@@ -62,7 +65,7 @@ export default function SignInScreen({ navigation }) {
           <TextInput
             style={styles.input}
             placeholder="Full Name"
-            placeholderTextColor="#666"
+            placeholderTextColor={theme.secondaryColor}
             value={name}
             onChangeText={setName}
             autoCapitalize="words"
@@ -81,6 +84,7 @@ export default function SignInScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: theme.container.backgroundColor,
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 20,
@@ -94,55 +98,56 @@ const styles = StyleSheet.create({
     fontSize: 40,
     color: '#000',
     fontStyle: 'italic',
-    fontWeight: 'bold', 
+    fontWeight: 'bold',
     marginBottom: 5,
     marginTop: -25,
   },
   subtitle: {
     fontSize: 14,
-    color: '#000',
-    marginBottom: 240, 
+    color: '#000', // Set color to black
+    marginBottom: 240,
     fontFamily: 'serif',
   },
   formContainer: {
-    width: '100%', 
+    width: '100%',
     alignItems: 'center',
     paddingHorizontal: 10,
   },
   label: {
     fontSize: 18,
-    color: '#333',
-    marginBottom: 10, 
+    color: theme.secondaryColor,
+    marginBottom: 10,
     textAlign: 'center',
   },
   input: {
-    width: '80%', 
-    maxWidth: 400, 
+    width: '80%',
+    maxWidth: 400,
     paddingVertical: 14,
     paddingHorizontal: 20,
     borderColor: '#D3D3D3',
     borderWidth: 1.5,
-    borderRadius: 20, 
-    marginBottom: 15, 
+    borderRadius: 20,
+    marginBottom: 15,
     backgroundColor: '#FFFFFF',
     textAlign: 'left',
     fontSize: 16,
+    color: '#000',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
-    elevation: 2, 
+    elevation: 2,
   },
   button: {
-    width: '80%', 
-    maxWidth: 400, 
+    width: '80%',
+    maxWidth: 400,
     paddingVertical: 15,
-    backgroundColor: '#B03A2E',
-    borderRadius: 30, 
+    backgroundColor: theme.primaryColor,
+    borderRadius: 30,
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 5, 
-    shadowColor: '#000', 
+    marginTop: 5,
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 4,
