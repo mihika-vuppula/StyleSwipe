@@ -1,5 +1,4 @@
-// src/screens/SignInScreen.js
-
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import React, { useState } from 'react';
 import {
@@ -12,7 +11,7 @@ import {
   Alert,
   Dimensions,
 } from 'react-native';
-import { theme } from '../styles/Theme'; // Import the theme
+import { theme } from '../styles/Theme';
 
 const { width } = Dimensions.get('window');
 
@@ -21,7 +20,7 @@ export default function SignInScreen({ navigation }) {
 
   const handleSignIn = async () => {
     if (name.trim()) {
-      const userId = `user-${Date.now()}`;
+      const userId = `user-${Date.now()}`; 
       const params = {
         UserID: userId,
         Name: name,
@@ -38,7 +37,10 @@ export default function SignInScreen({ navigation }) {
         );
 
         console.log('API Response:', response.data);
+
+        await AsyncStorage.setItem('@userID', userId);
         console.log(`UserID ${userId} stored successfully`);
+
         navigation.navigate('Main', {
           screen: 'Swipe',
           params: { userName: name },
@@ -104,7 +106,7 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     fontSize: 14,
-    color: '#000', // Set color to black
+    color: '#000',
     marginBottom: 240,
     fontFamily: 'serif',
   },
@@ -112,12 +114,6 @@ const styles = StyleSheet.create({
     width: '100%',
     alignItems: 'center',
     paddingHorizontal: 10,
-  },
-  label: {
-    fontSize: 18,
-    color: theme.secondaryColor,
-    marginBottom: 10,
-    textAlign: 'center',
   },
   input: {
     width: '80%',
