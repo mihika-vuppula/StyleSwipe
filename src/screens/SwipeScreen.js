@@ -9,8 +9,16 @@ const { height } = Dimensions.get('window');
 
 export default function SwipeScreen() {
   const [filterVisible, setFilterVisible] = useState(false);
+
+  // Filter states
   const [minPrice, setMinPrice] = useState('');
   const [maxPrice, setMaxPrice] = useState('');
+  const [selectedDesigner, setSelectedDesigner] = useState('');
+  const [selectedTop, setSelectedTop] = useState('');
+  const [selectedBottom, setSelectedBottom] = useState('');
+  const [selectedFootwear, setSelectedFootwear] = useState('');
+  const [isNew, setIsNew] = useState(false);
+
   const [popupVisible, setPopupVisible] = useState(false);
   const [popupMessage, setPopupMessage] = useState('');
 
@@ -24,9 +32,20 @@ export default function SwipeScreen() {
   const { product: bottomsProduct, loading: bottomsLoading, error: bottomsError } = useFetchRandomProduct([13281, 13297, 13302, 13377], bottomsRefresh);
   const { product: shoesProduct, loading: shoesLoading, error: shoesError } = useFetchRandomProduct([13438], shoesRefresh);
 
+  // Clear Filters Function
   const clearFilters = () => {
     setMinPrice('');
     setMaxPrice('');
+    setSelectedDesigner('');
+    setSelectedTop('');
+    setSelectedBottom('');
+    setSelectedFootwear('');
+    setIsNew(false);
+  };
+
+  // Toggle "What's New" Checkbox
+  const toggleIsNew = () => {
+    setIsNew((prev) => !prev);
   };
 
   const refreshProduct = (boxNumber) => {
@@ -48,7 +67,7 @@ export default function SwipeScreen() {
 
     setTimeout(() => {
       setPopupVisible(false);
-    }, 1000); 
+    }, 1000);
   };
 
   const handleHeartPress = (boxNumber) => {
@@ -122,6 +141,16 @@ export default function SwipeScreen() {
         maxPrice={maxPrice}
         setMinPrice={setMinPrice}
         setMaxPrice={setMaxPrice}
+        selectedDesigner={selectedDesigner}
+        setSelectedDesigner={setSelectedDesigner}
+        selectedTop={selectedTop}
+        setSelectedTop={setSelectedTop}
+        selectedBottom={selectedBottom}
+        setSelectedBottom={setSelectedBottom}
+        selectedFootwear={selectedFootwear}
+        setSelectedFootwear={setSelectedFootwear}
+        isNew={isNew}
+        toggleIsNew={toggleIsNew}
         clearFilters={clearFilters}
       />
       {popupVisible && (
