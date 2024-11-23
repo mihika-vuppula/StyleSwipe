@@ -7,6 +7,7 @@ import {
   TextInput,
   Modal,
   FlatList,
+  Alert,
 } from 'react-native';
 import { theme } from '../styles/Theme';
 import designerNames from '../constant/DesignerNames.json';
@@ -32,6 +33,7 @@ export default function FilterModal({
 }) {
   const [showDropdown, setShowDropdown] = useState(null);
 
+  // Local states to track temporary filter changes
   const [tempMinPrice, setTempMinPrice] = useState(initialMinPrice);
   const [tempMaxPrice, setTempMaxPrice] = useState(initialMaxPrice);
   const [tempSelectedDesigners, setTempSelectedDesigners] = useState(initialSelectedDesigners);
@@ -103,6 +105,27 @@ export default function FilterModal({
   );
 
   const handleApplyFilters = () => {
+    const minPrice = parseFloat(tempMinPrice);
+    const maxPrice = parseFloat(tempMaxPrice);
+
+    if (isNaN(minPrice) || isNaN(maxPrice)) {
+      Alert.alert("Invalid Input", "Please enter valid numeric values for the prices.");
+      return;
+    }
+
+    if (minPrice < 0) {
+      Alert.alert("Invalid Minimum Price", "Minimum price must be greater than or equal to 0.");
+      return;
+    }
+
+    if (maxPrice <= minPrice) {
+      Alert.alert(
+        "Invalid Maximum Price",
+        "Maximum price must be greater than the minimum price."
+      );
+      return;
+    }
+
     setMinPrice(tempMinPrice);
     setMaxPrice(tempMaxPrice);
     setSelectedDesigners(tempSelectedDesigners);
