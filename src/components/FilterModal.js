@@ -318,7 +318,6 @@ const styles = StyleSheet.create({
   },
   dropdownArrow: {
     marginLeft: 10,
-    color: theme.primaryColor,
   },
   dropdown: {
     borderWidth: 1,
