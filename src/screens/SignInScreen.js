@@ -10,6 +10,9 @@ import {
   ImageBackground,
   Alert,
   Dimensions,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
 } from 'react-native';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -69,25 +72,33 @@ export default function SignInScreen({ navigation }) {
       style={styles.container}
       resizeMode="cover"
     >
-      <View style={styles.content}>
-        <Text style={styles.title}>StyleSwipe</Text>
-        <Text style={styles.subtitle}>by Shopbop</Text>
-        <View style={styles.formContainer}>
-          <TextInput
-            style={styles.input}
-            placeholder="Full Name"
-            placeholderTextColor={theme.secondaryColor}
-            value={name}
-            onChangeText={setName}
-            autoCapitalize="words"
-            returnKeyType="done"
-            onSubmitEditing={handleSignIn}
-          />
-          <TouchableOpacity style={styles.button} onPress={handleSignIn}>
-            <Text style={styles.buttonText}>Get Started</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
+      <KeyboardAvoidingView
+        style={styles.container}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
+      >
+        <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
+          <View style={styles.content}>
+            <Text style={styles.title}>StyleSwipe</Text>
+            <Text style={styles.subtitle}>by Shopbop</Text>
+            <View style={styles.formContainer}>
+              <TextInput
+                style={styles.input}
+                placeholder="Full Name"
+                placeholderTextColor={theme.secondaryColor}
+                value={name}
+                onChangeText={setName}
+                autoCapitalize="words"
+                returnKeyType="done"
+                onSubmitEditing={handleSignIn}
+              />
+              <TouchableOpacity style={styles.button} onPress={handleSignIn}>
+                <Text style={styles.buttonText}>Get Started</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </ImageBackground>
   );
 }
@@ -95,7 +106,9 @@ export default function SignInScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: theme.container.backgroundColor,
+  },
+  scrollContent: {
+    flexGrow: 1,
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 20,
