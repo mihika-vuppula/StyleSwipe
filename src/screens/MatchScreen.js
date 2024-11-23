@@ -17,6 +17,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { theme } from '../styles/Theme';
 import axios from 'axios';
 import { UserContext } from '../context/UserContext';
+import { useIsFocused } from '@react-navigation/native'; // Import useIsFocused
 
 const screenWidth = Dimensions.get('window').width;
 const cardWidth = (screenWidth - 64) / 2;
@@ -28,6 +29,7 @@ export default function MatchScreen({ navigation }) {
   const [activeTab, setActiveTab] = useState('items');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const isFocused = useIsFocused(); // Get the focus state
 
   useEffect(() => {
     if (!userId) {
@@ -35,8 +37,11 @@ export default function MatchScreen({ navigation }) {
       setLoading(false);
       return;
     }
-    fetchMatches();
-  }, [userId]);
+
+    if (isFocused) {
+      fetchMatches();
+    }
+  }, [userId, isFocused]); // Add isFocused to dependencies
 
   const fetchMatches = async () => {
     setLoading(true);

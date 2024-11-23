@@ -1,5 +1,5 @@
 // src/screens/SignInScreen.js
-import axios from 'axios';
+
 import React, { useState, useContext } from 'react';
 import {
   View,
@@ -11,14 +11,16 @@ import {
   Alert,
   Dimensions,
 } from 'react-native';
-import { theme } from '../styles/Theme'; 
-import { UserContext } from '../context/UserContext'; 
+import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { theme } from '../styles/Theme';
+import { UserContext } from '../context/UserContext';
 
 const { width } = Dimensions.get('window');
 
 export default function SignInScreen({ navigation }) {
   const [name, setName] = useState('');
-  const { setUserId, setUserName } = useContext(UserContext); 
+  const { setUserId, setUserName } = useContext(UserContext);
 
   const handleSignIn = async () => {
     if (name.trim()) {
@@ -31,7 +33,7 @@ export default function SignInScreen({ navigation }) {
       try {
         console.log('Sending data to API:', params);
         const response = await axios.post(
-          'https://hayhuoxszf.execute-api.us-east-1.amazonaws.com/prod/users', 
+          'https://hayhuoxszf.execute-api.us-east-1.amazonaws.com/prod/users',
           params,
           {
             headers: { 'Content-Type': 'application/json' },
@@ -39,10 +41,19 @@ export default function SignInScreen({ navigation }) {
         );
 
         console.log('API Response:', response.data);
+
+        await AsyncStorage.setItem('@userID', userId);
         console.log(`UserID ${userId} stored successfully`);
+
+        // Set user ID and name before navigation
         setUserId(userId);
         setUserName(name);
-        navigation.navigate('Main');
+
+        // Navigate to Main screen
+        navigation.navigate('Main', {
+          screen: 'Swipe',
+          params: { userName: name },
+        });
       } catch (error) {
         console.error('Error storing UserID:', error);
         Alert.alert('Error', 'Failed to store user data. Please try again.');
@@ -104,7 +115,7 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     fontSize: 14,
-    color: '#000', 
+    color: '#000',
     marginBottom: 240,
     fontFamily: 'serif',
   },
@@ -112,12 +123,6 @@ const styles = StyleSheet.create({
     width: '100%',
     alignItems: 'center',
     paddingHorizontal: 10,
-  },
-  label: {
-    fontSize: 18,
-    color: theme.secondaryColor,
-    marginBottom: 10,
-    textAlign: 'center',
   },
   input: {
     width: '80%',
