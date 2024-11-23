@@ -1,13 +1,17 @@
-import React, { useState, useRef } from 'react';
+// src/screens/SwipeScreen.js
+import React, { useState, useRef, useContext } from 'react';
 import { View, Text, SafeAreaView, TouchableOpacity, StyleSheet, Dimensions, ActivityIndicator, Image, Animated } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import FilterModal from '../components/FilterModal';
 import { theme } from '../styles/Theme';
 import { useFetchRandomProduct } from '../hooks/useFetchProduct';
+import axios from 'axios'; // Import axios
+import { UserContext } from '../context/UserContext'; // Import UserContext
 
 const { height } = Dimensions.get('window');
 
 export default function SwipeScreen() {
+  const { userId } = useContext(UserContext); // Get userId from context
   const [filterVisible, setFilterVisible] = useState(false);
   const [minPrice, setMinPrice] = useState('');
   const [maxPrice, setMaxPrice] = useState('');
@@ -51,13 +55,70 @@ export default function SwipeScreen() {
     }, 1000); 
   };
 
-  const handleHeartPress = (boxNumber) => {
+  const handleHeartPress = async (boxNumber) => {
+    let product;
+    let itemType;
+  
+    if (boxNumber === 1) {
+      product = topsProduct;
+      itemType = 'top';
+    } else if (boxNumber === 2) {
+      product = bottomsProduct;
+      itemType = 'bottom';
+    } else if (boxNumber === 3) {
+      product = shoesProduct;
+      itemType = 'shoes';
+    }
+  
+    if (!product || !product.itemId) {
+      console.error("Product is missing or invalid:", product);
+      showPopup("Error: No product to like");
+      return;
+    }
+  
+    try {
+      console.log("Sending request to like item:", {
+        userId: userId,
+        itemId: product.itemId,
+        itemType: itemType,
+        imageUrl: product.imageUrl1,
+        productName: product.productName,
+        designerName: product.designerName,
+        productPrice: product.productPrice,
+      });
+  
+      // Call the like API
+      const response = await axios.post(
+        'https://2ox7hybif2.execute-api.us-east-1.amazonaws.com/dev/like-item',
+        {
+          userId: userId,
+          itemId: product.itemId,
+          itemType: itemType,
+          imageUrl: product.imageUrl1,
+          productName: product.productName,
+          designerName: product.designerName,
+          productPrice: product.productPrice,
+        },
+        {
+          headers: { 'Content-Type': 'application/json' },
+        }
+      );
+  
+      console.log('Like API Response:', response.data);
+      showPopup("YAY! Item Added To Your Fits");
+    } catch (error) {
+      console.error('Error liking item:', error.response || error.message);
+      showPopup("Error adding item to your fits");
+    }
+  
+    // Refresh the product
     refreshProduct(boxNumber);
-    showPopup("YAY! Item Added To Your Fits");
   };
+  
 
   const handleCreateOutfitPress = () => {
     showPopup("YAY! Outfit Added To Your Fits");
+    // Implement outfit creation logic here
   };
 
   const renderProductBox = (product, loading, error, boxNumber) => (
