@@ -105,25 +105,27 @@ export default function FilterModal({
   );
 
   const handleApplyFilters = () => {
-    const minPrice = parseFloat(tempMinPrice);
-    const maxPrice = parseFloat(tempMaxPrice);
+    if (tempMinPrice !== '' || tempMaxPrice !== '') {
+      const minPrice = parseFloat(tempMinPrice);
+      const maxPrice = parseFloat(tempMaxPrice);
 
-    if (isNaN(minPrice) || isNaN(maxPrice)) {
-      Alert.alert("Invalid Input", "Please enter valid numeric values for the prices.");
-      return;
-    }
+      if (!isNaN(minPrice) && minPrice < 0) {
+        Alert.alert("Invalid Minimum Price", "Minimum price must be greater than or equal to 0.");
+        return;
+      }
 
-    if (minPrice < 0) {
-      Alert.alert("Invalid Minimum Price", "Minimum price must be greater than or equal to 0.");
-      return;
-    }
+      if (!isNaN(minPrice) && !isNaN(maxPrice) && maxPrice <= minPrice) {
+        Alert.alert(
+          "Invalid Maximum Price",
+          "Maximum price must be greater than the minimum price."
+        );
+        return;
+      }
 
-    if (maxPrice <= minPrice) {
-      Alert.alert(
-        "Invalid Maximum Price",
-        "Maximum price must be greater than the minimum price."
-      );
-      return;
+      if (isNaN(minPrice) || isNaN(maxPrice)) {
+        Alert.alert("Invalid Input", "Please enter valid numeric values for the prices.");
+        return;
+      }
     }
 
     setMinPrice(tempMinPrice);
