@@ -1,6 +1,6 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import axios from 'axios';
-import React, { useState } from 'react';
+// src/screens/SignInScreen.js
+
+import React, { useState, useContext } from 'react';
 import {
   View,
   Text,
@@ -11,16 +11,20 @@ import {
   Alert,
   Dimensions,
 } from 'react-native';
+import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { theme } from '../styles/Theme';
+import { UserContext } from '../context/UserContext';
 
 const { width } = Dimensions.get('window');
 
 export default function SignInScreen({ navigation }) {
   const [name, setName] = useState('');
+  const { setUserId, setUserName } = useContext(UserContext);
 
   const handleSignIn = async () => {
     if (name.trim()) {
-      const userId = `user-${Date.now()}`; 
+      const userId = `user-${Date.now()}`;
       const params = {
         UserID: userId,
         Name: name,
@@ -41,6 +45,11 @@ export default function SignInScreen({ navigation }) {
         await AsyncStorage.setItem('@userID', userId);
         console.log(`UserID ${userId} stored successfully`);
 
+        // Set user ID and name before navigation
+        setUserId(userId);
+        setUserName(name);
+
+        // Navigate to Main screen
         navigation.navigate('Main', {
           screen: 'Swipe',
           params: { userName: name },

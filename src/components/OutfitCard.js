@@ -1,3 +1,4 @@
+// src/components/OutfitCard.js
 import React from 'react';
 import { View, Image, StyleSheet, Text, TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -9,18 +10,17 @@ export default function OutfitCard({ outfit, cardWidth }) {
            <View style={styles.outfitContainer}>
                 <View style={styles.imagesContainer}>
                     <View style={[styles.itemContainer, styles.imageSpacing]}>
-                        <Image source={{ uri: outfit.top.M.imageUrl.S }} style={[styles.image, { width: cardWidth - 2 }]} />
+                        <Image source={{ uri: outfit.top.imageUrl }} style={[styles.image, { width: cardWidth - 2 }]} />
                     </View>
                     <View style={[styles.itemContainer, styles.imageSpacing]}>
-                        <Image source={{ uri: outfit.bottom.M.imageUrl.S }} style={[styles.image, { width: cardWidth - 2 }]} />
+                        <Image source={{ uri: outfit.bottom.imageUrl }} style={[styles.image, { width: cardWidth - 2 }]} />
                     </View>
                     <View style={styles.itemContainer}>
-                        <Image source={{ uri: outfit.shoes.M.imageUrl.S }} style={[styles.image, { width: cardWidth - 2 }]} />
+                        <Image source={{ uri: outfit.shoes.imageUrl }} style={[styles.image, { width: cardWidth - 2 }]} />
                     </View>
                 </View>
             </View>
 
-            
             <View style={theme.buttonsContainer}>
                 <TouchableOpacity style={theme.detailsButton}>
                     <Text style={theme.detailsButtonText}>Details</Text>
