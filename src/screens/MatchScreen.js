@@ -17,7 +17,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { theme } from '../styles/Theme';
 import axios from 'axios';
 import { UserContext } from '../context/UserContext';
-import { useIsFocused } from '@react-navigation/native'; // Import useIsFocused
+import { useIsFocused } from '@react-navigation/native';
 
 const screenWidth = Dimensions.get('window').width;
 const cardWidth = (screenWidth - 64) / 2;
@@ -29,7 +29,7 @@ export default function MatchScreen({ navigation }) {
   const [activeTab, setActiveTab] = useState('items');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const isFocused = useIsFocused(); // Get the focus state
+  const isFocused = useIsFocused();
 
   useEffect(() => {
     if (!userId) {
@@ -41,7 +41,7 @@ export default function MatchScreen({ navigation }) {
     if (isFocused) {
       fetchMatches();
     }
-  }, [userId, isFocused]); // Add isFocused to dependencies
+  }, [userId, isFocused]);
 
   const fetchMatches = async () => {
     setLoading(true);
@@ -58,11 +58,6 @@ export default function MatchScreen({ navigation }) {
 
       console.log('Fetched matches response:', response.data);
 
-      if (response.status !== 200) {
-        throw new Error(`Unexpected response code: ${response.status}`);
-      }
-
-      // Extract and parse the body from response.data
       let responseData = response.data;
 
       // Check if responseData.body exists
@@ -82,23 +77,27 @@ export default function MatchScreen({ navigation }) {
 
       const { likedItems = [], likedOutfits = [] } = responseData;
 
-      // Log the likedItems to verify the data
+      // Log the likedItems and likedOutfits to verify the data
       console.log('Liked Items:', likedItems);
+      console.log('Liked Outfits:', likedOutfits);
 
       const mappedItems = likedItems.map((item) => ({
-        itemId: item.itemId || item.ItemId,
-        imageUrl: item.imageUrl || item.imageURL || item.ImageUrl,
-        productName: item.productName || item.ProductName,
-        designerName: item.designerName || item.DesignerName,
-        productPrice: item.productPrice || item.ProductPrice,
+        itemId: item.itemId,
+        imageUrl: item.imageUrl,
+        productName: item.productName,
+        designerName: item.designerName,
+        productPrice: item.productPrice,
       }));
 
       const mappedOutfits = likedOutfits.map((outfit) => ({
-        matchId: outfit.matchId || outfit.MatchId,
-        top: outfit.top || outfit.Top,
-        bottom: outfit.bottom || outfit.Bottom,
-        shoes: outfit.shoes || outfit.Shoes,
+        matchId: outfit.matchId,
+        top: outfit.top,
+        bottom: outfit.bottom,
+        shoes: outfit.shoes,
       }));
+
+      console.log('Mapped Items:', mappedItems);
+      console.log('Mapped Outfits:', mappedOutfits);
 
       setItems(mappedItems);
       setOutfits(mappedOutfits);
@@ -121,7 +120,13 @@ export default function MatchScreen({ navigation }) {
     }
   };
 
-  const renderOutfit = ({ item }) => <OutfitCard outfit={item} cardWidth={cardWidth} />;
+  const renderOutfit = ({ item }) => {
+    if (!item || !item.top || !item.bottom || !item.shoes) {
+      return null; // Skip rendering if data is incomplete
+    }
+    return <OutfitCard outfit={item} cardWidth={cardWidth} />;
+  };
+
   const renderItem = ({ item }) => <ItemCard item={item} cardWidth={cardWidth} />;
 
   if (loading) {
@@ -194,7 +199,7 @@ export default function MatchScreen({ navigation }) {
           <FlatList
             data={outfits}
             renderItem={renderOutfit}
-            keyExtractor={(item) => item.matchId.toString()}
+            keyExtractor={(item) => item.matchId || Math.random().toString()}
             numColumns={2}
             contentContainerStyle={styles.flatListContainer}
           />
