@@ -22,11 +22,10 @@ import { UserContext } from '../context/UserContext';
 const { height } = Dimensions.get('window');
 
 export default function SwipeScreen() {
-  const { userId } = useContext(UserContext);
-  const [filterVisible, setFilterVisible] = useState(false);
-  const [minPrice, setMinPrice] = useState('');
-  const [maxPrice, setMaxPrice] = useState('');
   const [popupVisible, setPopupVisible] = useState(false);
+
+  const { userId } = useContext(UserContext);
+
   const [popupMessage, setPopupMessage] = useState('');
 
   const [topsRefresh, setTopsRefresh] = useState(0);
@@ -51,9 +50,28 @@ export default function SwipeScreen() {
     error: shoesError,
   } = useFetchRandomProduct([13438], shoesRefresh);
 
+  const [filterVisible, setFilterVisible] = useState(false);
+
+  const [minPrice, setMinPrice] = useState('');
+  const [maxPrice, setMaxPrice] = useState('');
+  const [selectedDesigners, setSelectedDesigners] = useState([]);
+  const [selectedTops, setSelectedTops] = useState([]);
+  const [selectedBottoms, setSelectedBottoms] = useState([]);
+  const [selectedFootwears, setSelectedFootwears] = useState([]);
+  const [isNew, setIsNew] = useState(false);
+
   const clearFilters = () => {
     setMinPrice('');
     setMaxPrice('');
+    setSelectedDesigners([]);
+    setSelectedTops([]);
+    setSelectedBottoms([]);
+    setSelectedFootwears([]);
+    setIsNew(false);
+  };
+
+  const toggleIsNew = () => {
+    setIsNew((prev) => !prev);
   };
 
   const refreshProduct = (boxNumber) => {
@@ -262,6 +280,16 @@ export default function SwipeScreen() {
         setMinPrice={setMinPrice}
         setMaxPrice={setMaxPrice}
         clearFilters={clearFilters}
+        selectedDesigners={selectedDesigners}
+        setSelectedDesigners={setSelectedDesigners}
+        selectedTops={selectedTops}
+        setSelectedTops={setSelectedTops}
+        selectedBottoms={selectedBottoms}
+        setSelectedBottoms={setSelectedBottoms}
+        selectedFootwears={selectedFootwears}
+        setSelectedFootwears={setSelectedFootwears}
+        isNew={isNew}
+        toggleIsNew={toggleIsNew}
       />
       {popupVisible && (
         <Animated.View style={[styles.popup, { transform: [{ translateX: slideAnim }] }]}>
