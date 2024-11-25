@@ -1,3 +1,4 @@
+// app.js
 import { theme } from './src/styles/Theme';
 import React from 'react';
 import { StatusBar } from 'expo-status-bar';
@@ -12,6 +13,7 @@ import SwipeScreen from './src/screens/SwipeScreen';
 import SignInScreen from './src/screens/SignInScreen';
 import MatchScreen from './src/screens/MatchScreen';
 import AccountScreen from './src/screens/AccountScreen';
+import { UserProvider } from './src/context/UserContext'; 
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -57,23 +59,25 @@ function TabNavigator() {
 }
 
 export default function App() {
-  console.log('App component loaded'); // Log to ensure App.js is executed
+  console.log('App component loaded');
 
   return (
-    <NavigationContainer>
-      <Stack.Navigator initialRouteName="SignInScreen">
-        <Stack.Screen
-          name="SignInScreen"
-          component={SignInScreen}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="Main"
-          component={TabNavigator}
-          options={{ headerShown: false }}
-        />
-      </Stack.Navigator>
-      <StatusBar style="auto" />
-    </NavigationContainer>
+    <UserProvider>
+      <NavigationContainer>
+        <Stack.Navigator initialRouteName="SignInScreen">
+          <Stack.Screen
+            name="SignInScreen"
+            component={SignInScreen}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="Main"
+            component={TabNavigator}
+            options={{ headerShown: false }}
+          />
+        </Stack.Navigator>
+        <StatusBar style="auto" />
+      </NavigationContainer>
+    </UserProvider>
   );
 }

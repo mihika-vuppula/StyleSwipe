@@ -1,14 +1,31 @@
-import React, { useState, useRef } from 'react';
-import { View, Text, SafeAreaView, TouchableOpacity, StyleSheet, Dimensions, ActivityIndicator, Image, Animated } from 'react-native';
+// src/screens/SwipeScreen.js
+
+import React, { useState, useRef, useContext } from 'react';
+import {
+  View,
+  Text,
+  SafeAreaView,
+  TouchableOpacity,
+  StyleSheet,
+  Dimensions,
+  ActivityIndicator,
+  Image,
+  Animated,
+} from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import FilterModal from '../components/FilterModal';
 import { theme } from '../styles/Theme';
 import { useFetchRandomProduct } from '../hooks/useFetchProduct';
+import axios from 'axios';
+import { UserContext } from '../context/UserContext';
 
 const { height } = Dimensions.get('window');
 
 export default function SwipeScreen() {
-   const [popupVisible, setPopupVisible] = useState(false);
+  const [popupVisible, setPopupVisible] = useState(false);
+
+  const { userId } = useContext(UserContext);
+
   const [popupMessage, setPopupMessage] = useState('');
 
   const [topsRefresh, setTopsRefresh] = useState(0);
@@ -17,9 +34,21 @@ export default function SwipeScreen() {
 
   const slideAnim = useRef(new Animated.Value(Dimensions.get('window').width)).current;
 
-  const { product: topsProduct, loading: topsLoading, error: topsError } = useFetchRandomProduct([13317, 13332], topsRefresh);
-  const { product: bottomsProduct, loading: bottomsLoading, error: bottomsError } = useFetchRandomProduct([13281, 13297, 13302, 13377], bottomsRefresh);
-  const { product: shoesProduct, loading: shoesLoading, error: shoesError } = useFetchRandomProduct([13438], shoesRefresh);
+  const {
+    product: topsProduct,
+    loading: topsLoading,
+    error: topsError,
+  } = useFetchRandomProduct([13317, 13332], topsRefresh);
+  const {
+    product: bottomsProduct,
+    loading: bottomsLoading,
+    error: bottomsError,
+  } = useFetchRandomProduct([13281, 13297, 13302, 13377], bottomsRefresh);
+  const {
+    product: shoesProduct,
+    loading: shoesLoading,
+    error: shoesError,
+  } = useFetchRandomProduct([13438], shoesRefresh);
 
   const [filterVisible, setFilterVisible] = useState(false);
 
@@ -67,14 +96,126 @@ export default function SwipeScreen() {
     }, 1000);
   };
 
-  const handleHeartPress = (boxNumber) => {
+  const handleHeartPress = async (boxNumber) => {
+    let product;
+    let itemType;
+
+    if (boxNumber === 1) {
+      product = topsProduct;
+      itemType = 'top';
+    } else if (boxNumber === 2) {
+      product = bottomsProduct;
+      itemType = 'bottom';
+    } else if (boxNumber === 3) {
+      product = shoesProduct;
+      itemType = 'shoes';
+    }
+
+    if (!product || !product.itemId) {
+      console.error('Product is missing or invalid:', product);
+      showPopup('Error: No product to like');
+      return;
+    }
+
+    try {
+      console.log('Sending request to like item:', {
+        userId: userId,
+        itemId: product.itemId,
+        itemType: itemType,
+        imageUrl: product.imageUrl1,
+        productName: product.productName,
+        designerName: product.designerName,
+        productPrice: product.productPrice,
+        productUrl: product.productUrl
+      });
+
+      // Call the like API
+      const response = await axios.post(
+        'https://2ox7hybif2.execute-api.us-east-1.amazonaws.com/dev/like-item',
+        {
+          userId: userId,
+          itemId: product.itemId,
+          itemType: itemType,
+          imageUrl: product.imageUrl1,
+          productName: product.productName,
+          designerName: product.designerName,
+          productPrice: product.productPrice,
+          productUrl: product.productUrl
+        },
+        {
+          headers: { 'Content-Type': 'application/json' },
+        }
+      );
+
+      console.log('Like API Response:', response.data);
+      showPopup('YAY! Item Added To Your Fits');
+    } catch (error) {
+      console.error('Error liking item:', error.response || error.message);
+      showPopup('Error adding item to your fits');
+    }
+
+    // Refresh the product
     refreshProduct(boxNumber);
-    showPopup("YAY! Item Added To Your Fits");
   };
 
-  const handleCreateOutfitPress = () => {
-    showPopup("YAY! Outfit Added To Your Fits");
+  const handleCreateOutfitPress = async () => {
+    if (!topsProduct || !bottomsProduct || !shoesProduct) {
+      showPopup('Please make sure all items are loaded');
+      return;
+    }
+  
+    try {
+      const outfitData = {
+        userId: userId,
+        top: {
+          itemId: topsProduct.itemId,
+          itemType: 'top',
+          imageUrl: topsProduct.imageUrl1,
+          productName: topsProduct.productName,
+          designerName: topsProduct.designerName,
+          productPrice: topsProduct.productPrice,
+          productUrl: topsProduct.productUrl
+        },
+        bottom: {
+          itemId: bottomsProduct.itemId,
+          itemType: 'bottom',
+          imageUrl: bottomsProduct.imageUrl1,
+          productName: bottomsProduct.productName,
+          designerName: bottomsProduct.designerName,
+          productPrice: bottomsProduct.productPrice,
+          productUrl: bottomsProduct.productUrl
+        },
+        shoes: {
+          itemId: shoesProduct.itemId,
+          itemType: 'shoes',
+          imageUrl: shoesProduct.imageUrl1,
+          productName: shoesProduct.productName,
+          designerName: shoesProduct.designerName,
+          productPrice: shoesProduct.productPrice,
+          productUrl: shoesProduct.productUrl
+
+        },
+      };
+  
+      console.log('Sending request to create outfit:', outfitData);
+  
+      // Explicitly stringify the data
+      const response = await axios.post(
+        'https://2ox7hybif2.execute-api.us-east-1.amazonaws.com/dev/create-fit',
+        JSON.stringify(outfitData), // Stringify the outfitData
+        {
+          headers: { 'Content-Type': 'application/json' },
+        }
+      );
+  
+      console.log('Create Outfit API Response:', response.data);
+      showPopup('YAY! Outfit Added To Your Fits');
+    } catch (error) {
+      console.error('Error creating outfit:', error.response || error.message);
+      showPopup('Error adding outfit to your fits');
+    }
   };
+  
 
   const renderProductBox = (product, loading, error, boxNumber) => (
     <View style={styles.boxContainer}>
