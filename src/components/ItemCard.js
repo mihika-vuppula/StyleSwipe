@@ -22,11 +22,6 @@ export default function ItemCard({ item, cardWidth }) {
           style={[styles.image, { width: cardWidth - 2 }]}
         />
       </View>
-      <View style={styles.detailsContainer}>
-        <Text style={styles.designerName}>{item.designerName}</Text>
-        <Text style={styles.productName}>{item.productName}</Text>
-        <Text style={styles.productPrice}>{item.productPrice}</Text>
-      </View>
       <View style={theme.buttonsContainer}>
         <TouchableOpacity style={theme.detailsButton}>
           <Text style={theme.detailsButtonText}>Details</Text>
