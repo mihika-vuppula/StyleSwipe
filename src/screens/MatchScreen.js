@@ -1,11 +1,10 @@
-// MatchScreen.js
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { SafeAreaView, StyleSheet, View, Text, TouchableOpacity, FlatList, Dimensions } from 'react-native';
-import OutfitCard from '../components/OutfitCard.js';
+import ItemCard from '../components/ItemCard';
+import OutfitCard from '../components/OutfitCard';
+import DetailsModal from '../components/DetailsModal'; // Import DetailsModal
 import OutfitMatches from '../constant/OutfitMatches.json';
-import SavedItems from '../constant/SavedItems.json'
-import ItemCard from '../components/ItemCard.js'
-import { MaterialIcons } from '@expo/vector-icons';
+import SavedItems from '../constant/SavedItems.json';
 import { theme } from '../styles/Theme';
 
 const screenWidth = Dimensions.get('window').width;
@@ -15,21 +14,39 @@ export default function MatchScreen({ navigation }) {
     const [outfits, setOutfits] = useState([]);
     const [items, setItems] = useState([]);
     const [activeTab, setActiveTab] = useState('outfits');
+    const [selectedItem, setSelectedItem] = useState(null);
+    const [detailsVisible, setDetailsVisible] = useState(false);
 
     useEffect(() => {
         setOutfits(OutfitMatches);
         setItems(SavedItems);
     }, []);
 
-    const renderOutfit = ({ item }) => <OutfitCard outfit={item} cardWidth={cardWidth} />;
-    const renderItem = ({ item }) => <ItemCard item={item} cardWidth={cardWidth} />;
+    const openDetails = (item) => {
+        setSelectedItem(item);
+        setDetailsVisible(true);
+    };
+
+    const closeDetails = () => {
+        setSelectedItem(null);
+        setDetailsVisible(false);
+    };
+
+    const renderOutfit = ({ item }) => (
+        <OutfitCard outfit={item} cardWidth={cardWidth} />
+    );
+
+    const renderItem = ({ item }) => (
+        <ItemCard
+            item={item}
+            cardWidth={cardWidth}
+            onDetailsPress={() => openDetails(item)} // Open details modal
+        />
+    );
 
     return (
         <SafeAreaView style={theme.container}>
             <View style={theme.header}>
-                <TouchableOpacity onPress={() => navigation.navigate('Swipe')} style={[theme.topButton, styles.backButton]}>
-                    <MaterialIcons name="arrow-back-ios" size={24} color={theme.primaryColor} />
-                </TouchableOpacity>
                 <Text style={theme.title}>Your Fits</Text>
             </View>
             <View style={styles.tabContainer}>
@@ -50,7 +67,7 @@ export default function MatchScreen({ navigation }) {
                 <FlatList
                     data={outfits}
                     renderItem={renderOutfit}
-                    keyExtractor={(item) => item.matchId.S}
+                    keyExtractor={(item) => item.matchId}
                     numColumns={2}
                     contentContainerStyle={styles.flatListContainer}
                 />
@@ -63,15 +80,18 @@ export default function MatchScreen({ navigation }) {
                     contentContainerStyle={styles.flatListContainer}
                 />
             )}
+
+            {/* Details Modal */}
+            <DetailsModal
+                visible={detailsVisible}
+                onClose={closeDetails}
+                item={selectedItem}
+            />
         </SafeAreaView>
     );
 }
 
 const styles = StyleSheet.create({
-    backButton: {
-        paddingLeft: 12,
-        paddingRight: 4
-    },
     tabContainer: {
         flexDirection: 'row',
         justifyContent: 'space-between',

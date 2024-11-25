@@ -1,21 +1,19 @@
-// ItemCard.js
 import React from 'react';
 import { View, Image, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { theme } from '../styles/Theme';
 
-export default function ItemCard({ item, cardWidth }) {
+export default function ItemCard({ item, cardWidth, onDetailsPress }) {
     return (
         <View style={[styles.cardContainer, { width: cardWidth }]}>
             <View style={styles.imageContainer}>
                 <Image source={{ uri: item.imageUrl }} style={[styles.image, { width: cardWidth - 2 }]} />
             </View>
             <View style={theme.buttonsContainer}>
-                <TouchableOpacity style={theme.detailsButton}>
+                <TouchableOpacity style={theme.detailsButton} onPress={onDetailsPress}>
                     <Text style={theme.detailsButtonText}>Details</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={theme.shareButton}>
-                    <MaterialCommunityIcons name="share-outline" size={20} color="#333" />
+                <TouchableOpacity style={theme.detailsButton}>
+                    <Text style={theme.detailsButtonText}>Remove</Text>
                 </TouchableOpacity>
             </View>
         </View>
@@ -37,4 +35,3 @@ const styles = StyleSheet.create({
         resizeMode: 'cover',
     },
 });
-
