@@ -108,6 +108,7 @@ export default function SwipeScreen() {
         productName: product.productName,
         designerName: product.designerName,
         productPrice: product.productPrice,
+        productUrl: product.productUrl
       });
 
       // Call the like API
@@ -121,6 +122,7 @@ export default function SwipeScreen() {
           productName: product.productName,
           designerName: product.designerName,
           productPrice: product.productPrice,
+          productUrl: product.productUrl
         },
         {
           headers: { 'Content-Type': 'application/json' },
@@ -154,6 +156,7 @@ export default function SwipeScreen() {
           productName: topsProduct.productName,
           designerName: topsProduct.designerName,
           productPrice: topsProduct.productPrice,
+          productUrl: topsProduct.productUrl
         },
         bottom: {
           itemId: bottomsProduct.itemId,
@@ -162,6 +165,7 @@ export default function SwipeScreen() {
           productName: bottomsProduct.productName,
           designerName: bottomsProduct.designerName,
           productPrice: bottomsProduct.productPrice,
+          productUrl: bottomsProduct.productUrl
         },
         shoes: {
           itemId: shoesProduct.itemId,
@@ -170,6 +174,8 @@ export default function SwipeScreen() {
           productName: shoesProduct.productName,
           designerName: shoesProduct.designerName,
           productPrice: shoesProduct.productPrice,
+          productUrl: shoesProduct.productUrl
+
         },
       };
   

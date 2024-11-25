@@ -1,11 +1,19 @@
-// src/components/ItemCard.js
-
 import React from 'react';
-import { View, Image, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Image, Text, TouchableOpacity, StyleSheet, Share } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { theme } from '../styles/Theme';
 
 export default function ItemCard({ item, cardWidth }) {
+  const handleShare = async () => {
+    try {
+      await Share.share({
+        message: `Shop this item: ${item.productUrl}`,
+      });
+    } catch (error) {
+      console.error('Error sharing the URL:', error.message);
+    }
+  };
+
   return (
     <View style={[styles.cardContainer, { width: cardWidth }]}>
       <View style={styles.imageContainer}>
@@ -23,7 +31,7 @@ export default function ItemCard({ item, cardWidth }) {
         <TouchableOpacity style={theme.detailsButton}>
           <Text style={theme.detailsButtonText}>Details</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={theme.shareButton}>
+        <TouchableOpacity style={theme.shareButton} onPress={handleShare}>
           <MaterialCommunityIcons name="share-outline" size={20} color="#333" />
         </TouchableOpacity>
       </View>

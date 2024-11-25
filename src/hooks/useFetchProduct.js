@@ -35,6 +35,7 @@ export function useFetchRandomProduct(categoryArray, refreshTrigger) {
           productName: data.productName,
           designerName: data.designerName,
           productPrice: data.productPrice,
+          productUrl: data.productUrl
         });
       } catch (err) {
         console.error("Error fetching product:", err);

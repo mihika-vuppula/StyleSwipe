@@ -87,6 +87,7 @@ export default function MatchScreen({ navigation }) {
         productName: item.productName,
         designerName: item.designerName,
         productPrice: item.productPrice,
+        productUrl: item.productUrl
       }));
 
       const mappedOutfits = likedOutfits.map((outfit) => ({

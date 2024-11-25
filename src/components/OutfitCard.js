@@ -1,13 +1,31 @@
-// src/components/OutfitCard.js
-
 import React from 'react';
-import { View, Image, StyleSheet, Text, TouchableOpacity } from 'react-native';
+import { View, Image, StyleSheet, Text, TouchableOpacity, Share } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { theme } from '../styles/Theme';
 
 export default function OutfitCard({ outfit, cardWidth }) {
   // Destructure with defaults to prevent errors if data is missing
   const { top = {}, bottom = {}, shoes = {} } = outfit;
+
+  const shareLinks = async () => {
+    // Collect the available links
+    const links = [
+      top.productUrl ? `Top: ${top.productUrl}` : null,
+      bottom.productUrl ? `Bottom: ${bottom.productUrl}` : null,
+      shoes.productUrl ? `Shoes: ${shoes.productUrl}` : null,
+    ].filter(Boolean); // Filter out null/undefined links
+
+    // Combine the links into a single message
+    const linksMessage = links.join('\n');
+
+    try {
+      await Share.share({
+        message: `Check out this outfit:\n\n${linksMessage}`,
+      });
+    } catch (error) {
+      console.error('Error sharing links:', error);
+    }
+  };
 
   return (
     <View style={[styles.cardContainer, { width: cardWidth }]}>
@@ -38,7 +56,7 @@ export default function OutfitCard({ outfit, cardWidth }) {
         <TouchableOpacity style={theme.detailsButton}>
           <Text style={theme.detailsButtonText}>Details</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={theme.shareButton}>
+        <TouchableOpacity style={theme.shareButton} onPress={shareLinks}>
           <MaterialCommunityIcons name="share-outline" size={20} color="#333" />
         </TouchableOpacity>
       </View>
