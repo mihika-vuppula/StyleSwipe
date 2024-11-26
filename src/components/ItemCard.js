@@ -1,9 +1,9 @@
 import React from 'react';
 import { View, Image, Text, TouchableOpacity, StyleSheet, Share } from 'react-native';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
 import { theme } from '../styles/Theme';
 
-export default function ItemCard({ item, cardWidth }) {
+export default function ItemCard({ item, cardWidth, isTrending }) {
   const handleShare = async () => {
     try {
       await Share.share({
@@ -14,6 +14,11 @@ export default function ItemCard({ item, cardWidth }) {
     }
   };
 
+  const handleLike = () => {
+    // Add your like handling logic here
+    console.log('Liked item:', item.itemId);
+  };
+
   return (
     <View style={[styles.cardContainer, { width: cardWidth }]}>
       <View style={styles.imageContainer}>
@@ -21,6 +26,14 @@ export default function ItemCard({ item, cardWidth }) {
           source={{ uri: item.imageUrl }}
           style={[styles.image, { width: cardWidth - 2 }]}
         />
+        {isTrending && (
+          <TouchableOpacity 
+            style={styles.likeButton}
+            onPress={handleLike}
+          >
+            <MaterialIcons name="favorite" size={24} color={theme.primaryColor} />
+          </TouchableOpacity>
+        )}
       </View>
       <View style={theme.buttonsContainer}>
         <TouchableOpacity style={theme.detailsButton}>
@@ -43,10 +56,27 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     borderWidth: 1,
     overflow: 'hidden',
+    position: 'relative', // Added to position the like button
   },
   image: {
     height: 195,
     resizeMode: 'cover',
+  },
+  likeButton: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
+    backgroundColor: 'white',
+    borderRadius: 20,
+    padding: 8,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
   },
   detailsContainer: {
     paddingTop: 8,

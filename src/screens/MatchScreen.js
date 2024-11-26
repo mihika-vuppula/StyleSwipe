@@ -1,5 +1,3 @@
-// src/screens/MatchScreen.js
-
 import React, { useEffect, useState, useContext } from 'react';
 import {
   SafeAreaView,
@@ -13,7 +11,7 @@ import {
 } from 'react-native';
 import OutfitCard from '../components/OutfitCard.js';
 import ItemCard from '../components/ItemCard.js';
-import { MaterialIcons } from '@expo/vector-icons';
+import { MaterialIcons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { theme } from '../styles/Theme';
 import axios from 'axios';
 import { UserContext } from '../context/UserContext';
@@ -26,8 +24,9 @@ export default function MatchScreen({ navigation }) {
   const { userId } = useContext(UserContext);
   const [outfits, setOutfits] = useState([]);
   const [items, setItems] = useState([]);
+  const [trending, setTrending] = useState([]);
   const [activeTab, setActiveTab] = useState('items');
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const isFocused = useIsFocused();
 
@@ -60,26 +59,19 @@ export default function MatchScreen({ navigation }) {
 
       let responseData = response.data;
 
-      // Check if responseData.body exists
       if (responseData.body) {
         let bodyData = responseData.body;
 
-        // If bodyData is a JSON string, parse it
         if (typeof bodyData === 'string') {
           bodyData = JSON.parse(bodyData);
         }
 
         responseData = bodyData;
       } else {
-        // Handle case where body is not present
         throw new Error('Invalid response data: missing body');
       }
 
       const { likedItems = [], likedOutfits = [] } = responseData;
-
-      // Log the likedItems and likedOutfits to verify the data
-      console.log('Liked Items:', likedItems);
-      console.log('Liked Outfits:', likedOutfits);
 
       const mappedItems = likedItems.map((item) => ({
         itemId: item.itemId,
@@ -87,7 +79,7 @@ export default function MatchScreen({ navigation }) {
         productName: item.productName,
         designerName: item.designerName,
         productPrice: item.productPrice,
-        productUrl: item.productUrl
+        productUrl: item.productUrl,
       }));
 
       const mappedOutfits = likedOutfits.map((outfit) => ({
@@ -96,9 +88,6 @@ export default function MatchScreen({ navigation }) {
         bottom: outfit.bottom,
         shoes: outfit.shoes,
       }));
-
-      console.log('Mapped Items:', mappedItems);
-      console.log('Mapped Outfits:', mappedOutfits);
 
       setItems(mappedItems);
       setOutfits(mappedOutfits);
@@ -121,9 +110,48 @@ export default function MatchScreen({ navigation }) {
     }
   };
 
+  const fetchTrending = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await axios.get(
+        'https://mec9qba05g.execute-api.us-east-1.amazonaws.com/dev/trending', // Your API Gateway URL
+        {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+  
+      // Check if the body is a string or already parsed
+      let responseBody = response.data.body;
+      if (typeof responseBody === 'string') {
+        responseBody = JSON.parse(responseBody); // Parse if it's a JSON string
+      }
+  
+      // Access the `trending` array
+      const trendingItems = responseBody.trending.map((item) => ({
+        itemId: item.itemId,
+        imageUrl: item.imageUrl,
+        productName: item.productName,
+        designerName: item.designerName,
+        productPrice: item.productPrice,
+        count: item.count,
+      }));
+  
+      setTrending(trendingItems);
+    } catch (err) {
+      console.error('Error fetching trending data:', err);
+      setError('Failed to fetch trending items. Please try again later.');
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+
   const renderOutfit = ({ item }) => {
     if (!item || !item.top || !item.bottom || !item.shoes) {
-      return null; // Skip rendering if data is incomplete
+      return null;
     }
     return <OutfitCard outfit={item} cardWidth={cardWidth} />;
   };
@@ -194,6 +222,18 @@ export default function MatchScreen({ navigation }) {
             Outfits
           </Text>
         </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.tabButton, activeTab === 'trending' && styles.activeTab]}
+          onPress={() => {
+            setActiveTab('trending');
+            fetchTrending();
+          }}
+        >
+          <MaterialCommunityIcons name="fire" size={16} color={activeTab === 'trending' ? '#fff' : theme.primaryColor} />
+          <Text style={[styles.tabText, activeTab === 'trending' && styles.activeText]}>
+            Trending
+          </Text>
+        </TouchableOpacity>
       </View>
       {activeTab === 'outfits' ? (
         outfits.length > 0 ? (
@@ -209,6 +249,23 @@ export default function MatchScreen({ navigation }) {
             <Text style={styles.messageText}>No outfits saved yet.</Text>
           </View>
         )
+      ) : activeTab === 'trending' ? (
+       
+          trending.length > 0 ? (
+            <FlatList
+              data={trending}
+              renderItem={({ item }) => <ItemCard item={item} cardWidth={cardWidth} isTrending={true} />}
+              keyExtractor={(item) => item.itemId.toString()}
+              key={activeTab}
+              numColumns={2}
+              contentContainerStyle={styles.flatListContainer}
+            />
+          ) : (
+            <View style={styles.messageContainer}>
+              <Text style={styles.messageText}>No trending items yet.</Text>
+            </View>
+          )
+        
       ) : items.length > 0 ? (
         <FlatList
           data={items}
@@ -245,6 +302,8 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: theme.secondaryColor,
     alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center',
   },
   activeTab: {
     backgroundColor: theme.primaryColor,
@@ -254,6 +313,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     textAlign: 'center',
     color: theme.primaryColor,
+    marginLeft: 4,
   },
   activeText: {
     color: '#fff',
