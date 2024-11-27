@@ -1,6 +1,6 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import axios from 'axios';
-import React, { useState } from 'react';
+// src/screens/SignInScreen.js
+
+import React, { useState, useContext } from 'react';
 import {
   View,
   Text,
@@ -10,17 +10,24 @@ import {
   ImageBackground,
   Alert,
   Dimensions,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
 } from 'react-native';
+import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { theme } from '../styles/Theme';
+import { UserContext } from '../context/UserContext';
 
 const { width } = Dimensions.get('window');
 
 export default function SignInScreen({ navigation }) {
   const [name, setName] = useState('');
+  const { setUserId, setUserName } = useContext(UserContext);
 
   const handleSignIn = async () => {
     if (name.trim()) {
-      const userId = `user-${Date.now()}`; 
+      const userId = `user-${Date.now()}`;
       const params = {
         UserID: userId,
         Name: name,
@@ -41,6 +48,11 @@ export default function SignInScreen({ navigation }) {
         await AsyncStorage.setItem('@userID', userId);
         console.log(`UserID ${userId} stored successfully`);
 
+        // Set user ID and name before navigation
+        setUserId(userId);
+        setUserName(name);
+
+        // Navigate to Main screen
         navigation.navigate('Main', {
           screen: 'Swipe',
           params: { userName: name },
@@ -60,25 +72,33 @@ export default function SignInScreen({ navigation }) {
       style={styles.container}
       resizeMode="cover"
     >
-      <View style={styles.content}>
-        <Text style={styles.title}>StyleSwipe</Text>
-        <Text style={styles.subtitle}>by Shopbop</Text>
-        <View style={styles.formContainer}>
-          <TextInput
-            style={styles.input}
-            placeholder="Full Name"
-            placeholderTextColor={theme.secondaryColor}
-            value={name}
-            onChangeText={setName}
-            autoCapitalize="words"
-            returnKeyType="done"
-            onSubmitEditing={handleSignIn}
-          />
-          <TouchableOpacity style={styles.button} onPress={handleSignIn}>
-            <Text style={styles.buttonText}>Get Started</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
+      <KeyboardAvoidingView
+        style={styles.container}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
+      >
+        <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
+          <View style={styles.content}>
+            <Text style={styles.title}>StyleSwipe</Text>
+            <Text style={styles.subtitle}>by Shopbop</Text>
+            <View style={styles.formContainer}>
+              <TextInput
+                style={styles.input}
+                placeholder="Full Name"
+                placeholderTextColor={theme.secondaryColor}
+                value={name}
+                onChangeText={setName}
+                autoCapitalize="words"
+                returnKeyType="done"
+                onSubmitEditing={handleSignIn}
+              />
+              <TouchableOpacity style={styles.button} onPress={handleSignIn}>
+                <Text style={styles.buttonText}>Get Started</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </ImageBackground>
   );
 }
@@ -86,7 +106,9 @@ export default function SignInScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: theme.container.backgroundColor,
+  },
+  scrollContent: {
+    flexGrow: 1,
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 20,

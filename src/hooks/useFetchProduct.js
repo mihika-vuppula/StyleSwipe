@@ -27,14 +27,15 @@ export function useFetchRandomProduct(categoryArray, refreshTrigger) {
         }
 
         const data = await response.json();
-        
+
         setProduct({
+          itemId: data.productId, 
           imageUrl1: data.imageUrls[0], 
           imageUrl4: data.imageUrls[1], 
           productName: data.productName,
           designerName: data.designerName,
           productPrice: data.productPrice,
-          productId: data.productId,
+          productUrl: data.productUrl
         });
       } catch (err) {
         console.error("Error fetching product:", err);
