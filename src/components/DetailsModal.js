@@ -121,7 +121,7 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
     },
     buyButton: {
-        padding: 10,
+        padding: 6,
         borderRadius: 10,
         alignItems: 'center',
         borderWidth: 1,
