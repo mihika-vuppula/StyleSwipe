@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, Image, Modal, TouchableOpacity, StyleSheet, Dimensions } from 'react-native';
+import { View, Text, Image, Modal, TouchableOpacity, StyleSheet, Dimensions, Linking } from 'react-native';
 import { theme } from '../styles/Theme';
 
 const { width, height } = Dimensions.get('window');
@@ -7,7 +7,17 @@ const { width, height } = Dimensions.get('window');
 export default function DetailsModal({ visible, onClose, item }) {
     if (!item) return null;
 
-    const isMultipleItems = Array.isArray(item); 
+    const isMultipleItems = Array.isArray(item);
+
+    const openProductUrl = (url) => {
+        if (url) {
+            Linking.openURL(url).catch((err) =>
+                console.error("Failed to open URL:", err)
+            );
+        } else {
+            console.warn("No URL provided for this product.");
+        }
+    };
 
     const renderProductDetails = (product, index) => (
         <View key={index} style={styles.content}>
@@ -21,7 +31,10 @@ export default function DetailsModal({ visible, onClose, item }) {
                 <View>
                     <Text style={styles.price}>{product.productPrice}</Text>
                     
-                    <TouchableOpacity style={styles.buyButton}>
+                    <TouchableOpacity
+                        style={styles.buyButton}
+                        onPress={() => openProductUrl(product.productUrl)} 
+                    >
                         <Text style={styles.buyButtonText}>Buy on Shopbop</Text>
                     </TouchableOpacity>
                 </View>
@@ -45,10 +58,9 @@ export default function DetailsModal({ visible, onClose, item }) {
                         <Text style={theme.title}>Details</Text>
                     </View>
 
-                    {/* Content */}
                     <View style={styles.scrollableContent}>
                         {isMultipleItems
-                            ? item.map((product, index) => renderProductDetails(product, index)) 
+                            ? item.map((product, index) => renderProductDetails(product, index))
                             : renderProductDetails(item)}
                     </View>
                 </View>
@@ -76,10 +88,10 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         paddingHorizontal: 16,
         paddingVertical: 10,
-        justifyContent: 'space-between', 
+        justifyContent: 'space-between',
     },
     closeButton: {
-        padding: 10, 
+        padding: 10,
         alignItems: 'center',
         justifyContent: 'center',
     },
@@ -95,7 +107,7 @@ const styles = StyleSheet.create({
     content: {
         flexDirection: 'row',
         marginBottom: 16,
-        height: height * 0.2 
+        height: height * 0.2,
     },
     image: {
         width: '45%',
@@ -126,9 +138,9 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         borderWidth: 1,
         borderColor: theme.secondaryColor,
-        marginRight: 40
+        marginRight: 40,
     },
     buyButtonText: {
-       fontWeight: 'bold',
+        fontWeight: 'bold',
     },
 });

@@ -22,80 +22,102 @@ const screenWidth = Dimensions.get('window').width;
 const cardWidth = (screenWidth - 64) / 2;
 
 export default function MatchScreen({ navigation }) {
-  const { userId } = useContext(UserContext);
-  const [outfits, setOutfits] = useState([]);
-  const [items, setItems] = useState([]);
-  const [activeTab, setActiveTab] = useState('items');
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const isFocused = useIsFocused();
-  const [selectedItem, setSelectedItem] = useState(null);
-  const [detailsVisible, setDetailsVisible] = useState(false);
-
-  useEffect(() => {
-    if (!userId) {
-      setError('User ID is missing. Please log in again.');
-      setLoading(false);
-      return;
-    }
-
-    if (isFocused) {
-      fetchMatches();
-    }
-  }, [userId, isFocused]);
-
-  const fetchMatches = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await axios.get(
-        `https://2ox7hybif2.execute-api.us-east-1.amazonaws.com/dev/getLikedItems/${userId}`,
-        {
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        }
-      );
-
-      console.log('Fetched matches response:', response.data);
-
-      let responseData = response.data;
-
-      // Check if responseData.body exists
-      if (responseData.body) {
-        let bodyData = responseData.body;
-
-        // If bodyData is a JSON string, parse it
-        if (typeof bodyData === 'string') {
-          bodyData = JSON.parse(bodyData);
-        }
-
-        responseData = bodyData;
-      } else {
-        // Handle case where body is not present
-        throw new Error('Invalid response data: missing body');
-      }
-
-      const { likedItems = [], likedOutfits = [] } = responseData;
-
-      // Log the likedItems and likedOutfits to verify the data
-      console.log('Liked Items:', likedItems);
-      console.log('Liked Outfits:', likedOutfits);
-
+    const { userId } = useContext(UserContext);
+    const [outfits, setOutfits] = useState([]);
+    const [items, setItems] = useState([]);
+    const [activeTab, setActiveTab] = useState('items');
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+    const isFocused = useIsFocused();
+    const [selectedItem, setSelectedItem] = useState(null);
+    const [detailsVisible, setDetailsVisible] = useState(false);
+  
     const openDetails = (item) => {
         setSelectedItem(item);
         setDetailsVisible(true);
     };
-
+  
     const closeDetails = () => {
         setSelectedItem(null);
         setDetailsVisible(false);
     };
+  
+    useEffect(() => {
+      if (!userId) {
+        setError('User ID is missing. Please log in again.');
+        setLoading(false);
+        return;
+      }
+  
+      if (isFocused) {
+        fetchMatches();
+      }
+    }, [userId, isFocused]);
+  
+    const fetchMatches = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const response = await axios.get(
+          `https://2ox7hybif2.execute-api.us-east-1.amazonaws.com/dev/getLikedItems/${userId}`,
+          {
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          }
+        );
+  
+        let responseData = response.data;
+  
+        if (responseData.body) {
+          let bodyData = responseData.body;
+          if (typeof bodyData === 'string') {
+            bodyData = JSON.parse(bodyData);
+          }
+          responseData = bodyData;
+        } else {
+          throw new Error('Invalid response data: missing body');
+        }
+  
+        const { likedItems = [], likedOutfits = [] } = responseData;
 
+        // Log the likedItems and likedOutfits to verify the data
+        console.log('Liked Items:', likedItems);
+        console.log('Liked Outfits:', likedOutfits);
+  
+        const mappedItems = likedItems.map((item) => ({
+          itemId: item.itemId,
+          imageUrl: item.imageUrl,
+          productName: item.productName,
+          designerName: item.designerName,
+          productPrice: item.productPrice,
+          productUrl: item.productUrl,
+        }));
+  
+        const mappedOutfits = likedOutfits.map((outfit) => ({
+          matchId: outfit.matchId,
+          top: outfit.top,
+          bottom: outfit.bottom,
+          shoes: outfit.shoes,
+        }));
+  
+        setItems(mappedItems);
+        setOutfits(mappedOutfits);
+      } catch (err) {
+        console.error('Error fetching matches:', err);
+        setError(err.response?.data?.message || 'An unexpected error occurred.');
+      } finally {
+        setLoading(false);
+      }
+    };
+  
     const renderOutfit = ({ item }) => (
-        <OutfitCard outfit={item} cardWidth={cardWidth} />
+      <OutfitCard
+        outfit={item}
+        cardWidth={cardWidth}
+      />
     );
-
+  
     const renderItem = ({ item }) => (
         <ItemCard
             item={item}
@@ -103,54 +125,7 @@ export default function MatchScreen({ navigation }) {
             onDetailsPress={() => openDetails(item)} 
         />
     );
-      const mappedItems = likedItems.map((item) => ({
-        itemId: item.itemId,
-        imageUrl: item.imageUrl,
-        productName: item.productName,
-        designerName: item.designerName,
-        productPrice: item.productPrice,
-        productUrl: item.productUrl
-      }));
-
-      const mappedOutfits = likedOutfits.map((outfit) => ({
-        matchId: outfit.matchId,
-        top: outfit.top,
-        bottom: outfit.bottom,
-        shoes: outfit.shoes,
-      }));
-
-      console.log('Mapped Items:', mappedItems);
-      console.log('Mapped Outfits:', mappedOutfits);
-
-      setItems(mappedItems);
-      setOutfits(mappedOutfits);
-    } catch (err) {
-      console.error('Error fetching matches:', err);
-
-      if (err.response) {
-        setError(
-          `Server Error: ${err.response.status} - ${
-            err.response.data.message || err.response.statusText
-          }`
-        );
-      } else if (err.request) {
-        setError('No response from server. Please check your network connection.');
-      } else {
-        setError('An unexpected error occurred. Please try again.');
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const renderOutfit = ({ item }) => {
-    if (!item || !item.top || !item.bottom || !item.shoes) {
-      return null; // Skip rendering if data is incomplete
-    }
-    return <OutfitCard outfit={item} cardWidth={cardWidth} />;
-  };
-
-  const renderItem = ({ item }) => <ItemCard item={item} cardWidth={cardWidth} />;
+      
 
   if (loading) {
     return (
