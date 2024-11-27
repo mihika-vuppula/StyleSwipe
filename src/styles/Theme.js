@@ -36,17 +36,25 @@ export const theme = {
   },
   detailsButton: {
         borderWidth: 1,
-        borderColor: '#adafbb',
+        borderColor: secondaryColor,
         paddingVertical: 6,
         paddingHorizontal: 10,
         borderRadius: 20,
         alignItems: 'center',
         flex: 1, 
-        marginHorizontal: 4,
+        marginRight: 4,
   },
   detailsButtonText: {
       fontSize: 12,
       fontWeight: 'bold',
   },
+  shareButton: {
+    borderWidth: 1,
+    borderColor: secondaryColor,
+    padding: 4,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+},
 };
   

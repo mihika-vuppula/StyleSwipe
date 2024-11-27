@@ -2,10 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { SafeAreaView, StyleSheet, View, Text, TouchableOpacity, FlatList, Dimensions } from 'react-native';
 import ItemCard from '../components/ItemCard';
 import OutfitCard from '../components/OutfitCard';
-import DetailsModal from '../components/DetailsModal'; // Import DetailsModal
+import DetailsModal from '../components/DetailsModal'; 
 import OutfitMatches from '../constant/OutfitMatches.json';
 import SavedItems from '../constant/SavedItems.json';
 import { theme } from '../styles/Theme';
+import { MaterialIcons } from '@expo/vector-icons';
 
 const screenWidth = Dimensions.get('window').width;
 const cardWidth = (screenWidth - 64) / 2;
@@ -40,13 +41,16 @@ export default function MatchScreen({ navigation }) {
         <ItemCard
             item={item}
             cardWidth={cardWidth}
-            onDetailsPress={() => openDetails(item)} // Open details modal
+            onDetailsPress={() => openDetails(item)} 
         />
     );
 
     return (
         <SafeAreaView style={theme.container}>
             <View style={theme.header}>
+                <TouchableOpacity onPress={() => navigation.navigate('Swipe')} style={[theme.topButton, styles.backButton]}>
+                    <MaterialIcons name="arrow-back-ios" size={24} color={theme.primaryColor} />
+                </TouchableOpacity>
                 <Text style={theme.title}>Your Fits</Text>
             </View>
             <View style={styles.tabContainer}>
@@ -81,7 +85,6 @@ export default function MatchScreen({ navigation }) {
                 />
             )}
 
-            {/* Details Modal */}
             <DetailsModal
                 visible={detailsVisible}
                 onClose={closeDetails}
@@ -97,6 +100,10 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         marginHorizontal: 16,
         marginVertical: 16,
+    },
+    backButton: { 
+        paddingLeft: 12,
+        paddingRight: 4
     },
     tabButton: {
         flex: 1,

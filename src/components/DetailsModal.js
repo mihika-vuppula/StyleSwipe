@@ -1,6 +1,5 @@
 import React from 'react';
-import { View, Text, Image, Modal, TouchableOpacity, StyleSheet, Dimensions, Share } from 'react-native';
-import { MaterialCommunityIcons } from '@expo/vector-icons'; // Import MaterialCommunityIcons
+import { View, Text, Image, Modal, TouchableOpacity, StyleSheet, Dimensions } from 'react-native';
 import { theme } from '../styles/Theme';
 
 const { width, height } = Dimensions.get('window');
@@ -15,18 +14,15 @@ export default function DetailsModal({ visible, onClose, item }) {
             <Image source={{ uri: product.imageUrl }} style={styles.image} />
 
             <View style={styles.detailsContainer}>
-                <Text style={styles.name}>{product.productName}</Text>
-                <Text style={styles.designer}>{product.designerName}</Text>
-                <Text style={styles.price}>{product.productPrice}</Text>
-
-                <View style={styles.buttonContainer}>
+                <View>
+                    <Text style={styles.name}>{product.productName}</Text>
+                    <Text style={styles.designer}>{product.designerName}</Text>
+                </View>
+                <View>
+                    <Text style={styles.price}>{product.productPrice}</Text>
+                    
                     <TouchableOpacity style={styles.buyButton}>
                         <Text style={styles.buyButtonText}>Buy on Shopbop</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                        style={styles.shareButton}
-                    >
-                        <MaterialCommunityIcons name="share-outline" size={20} />
                     </TouchableOpacity>
                 </View>
             </View>
@@ -42,7 +38,6 @@ export default function DetailsModal({ visible, onClose, item }) {
         >
             <View style={styles.modalOverlay}>
                 <View style={styles.modalContent}>
-                    {/* Header */}
                     <View style={styles.header}>
                         <TouchableOpacity onPress={onClose} style={styles.closeButton}>
                             <Text style={styles.closeText}>✕</Text>
@@ -79,11 +74,14 @@ const styles = StyleSheet.create({
     header: {
         flexDirection: 'row',
         alignItems: 'center',
-        paddingHorizontal: 30,
-        marginVertical: 15,
+        paddingHorizontal: 16,
+        paddingVertical: 10,
+        justifyContent: 'space-between', 
     },
     closeButton: {
-        marginRight: 16,
+        padding: 10, 
+        alignItems: 'center',
+        justifyContent: 'center',
     },
     closeText: {
         fontSize: 18,
@@ -97,6 +95,7 @@ const styles = StyleSheet.create({
     content: {
         flexDirection: 'row',
         marginBottom: 16,
+        height: height * 0.2 
     },
     image: {
         width: '45%',
@@ -116,38 +115,20 @@ const styles = StyleSheet.create({
     designer: {
         fontSize: 16,
         color: '#666',
-        marginBottom: 40,
     },
     price: {
         fontSize: 18,
         fontWeight: 'bold',
-        marginBottom: 5,
-    },
-    buttonContainer: {
-        flexDirection: 'row',
-        marginTop: 10,
     },
     buyButton: {
-        backgroundColor: theme.primaryColor,
         padding: 10,
-        borderRadius: 20,
+        borderRadius: 10,
         alignItems: 'center',
-        marginRight: 10,
+        borderWidth: 1,
+        borderColor: theme.secondaryColor,
+        marginRight: 40
     },
     buyButtonText: {
-        color: '#fff',
-        fontWeight: 'bold',
-    },
-    shareButton: {
-        borderRadius: 20,
-        alignItems: 'center',
-        flexDirection: 'row',
-        padding: 8,
-        borderWidth: 1,
-    },
-    shareButtonText: {
-        fontWeight: 'bold',
-        fontSize: 14,
-        color: '#333',
+       fontWeight: 'bold',
     },
 });

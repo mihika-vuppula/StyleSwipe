@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { View, Image, StyleSheet, Text, TouchableOpacity } from 'react-native';
 import { theme } from '../styles/Theme';
 import DetailsModal from './DetailsModal'; 
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+
 
 export default function OutfitCard({ outfit, cardWidth }) {
     const [detailsVisible, setDetailsVisible] = useState(false);
@@ -30,39 +32,33 @@ export default function OutfitCard({ outfit, cardWidth }) {
     return (
         <>
             <View style={[styles.cardContainer, { width: cardWidth }]}>
-                {/* Outfit Images */}
                 <View style={styles.outfitContainer}>
                     <View style={styles.imagesContainer}>
-                        {/* Top */}
                         <View style={[styles.itemContainer, styles.imageSpacing]}>
                             <Image source={{ uri: outfit.top.M.imageUrl.S }} style={[styles.image, { width: cardWidth - 2 }]} />
                         </View>
-                        {/* Bottom */}
                         <View style={[styles.itemContainer, styles.imageSpacing]}>
                             <Image source={{ uri: outfit.bottom.M.imageUrl.S }} style={[styles.image, { width: cardWidth - 2 }]} />
                         </View>
-                        {/* Shoes */}
                         <View style={styles.itemContainer}>
                             <Image source={{ uri: outfit.shoes.M.imageUrl.S }} style={[styles.image, { width: cardWidth - 2 }]} />
                         </View>
                     </View>
                 </View>
 
-                {/* Buttons */}
                 <View style={theme.buttonsContainer}>
                     <TouchableOpacity
                         style={theme.detailsButton}
-                        onPress={() => setDetailsVisible(true)} // Open DetailsModal
+                        onPress={() => setDetailsVisible(true)} 
                     >
                         <Text style={theme.detailsButtonText}>Details</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity style={theme.detailsButton}>
-                        <Text style={theme.detailsButtonText}>Remove</Text>
+                    <TouchableOpacity style={theme.shareButton}>
+                        <MaterialCommunityIcons name="share-outline" size={20} color="#333" />
                     </TouchableOpacity>
                 </View>
             </View>
 
-            {/* Details Modal */}
             <DetailsModal
                 visible={detailsVisible}
                 onClose={() => setDetailsVisible(false)} 

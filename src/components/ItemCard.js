@@ -1,6 +1,8 @@
 import React from 'react';
 import { View, Image, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { theme } from '../styles/Theme';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+
 
 export default function ItemCard({ item, cardWidth, onDetailsPress }) {
     return (
@@ -12,8 +14,8 @@ export default function ItemCard({ item, cardWidth, onDetailsPress }) {
                 <TouchableOpacity style={theme.detailsButton} onPress={onDetailsPress}>
                     <Text style={theme.detailsButtonText}>Details</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={theme.detailsButton}>
-                    <Text style={theme.detailsButtonText}>Remove</Text>
+                <TouchableOpacity style={theme.shareButton}>
+                    <MaterialCommunityIcons name="share-outline" size={20} color="#333" />
                 </TouchableOpacity>
             </View>
         </View>
