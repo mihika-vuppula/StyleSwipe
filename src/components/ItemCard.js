@@ -1,9 +1,9 @@
 import React from 'react';
 import { View, Image, Text, TouchableOpacity, StyleSheet, Share } from 'react-native';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { theme } from '../styles/Theme';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 
-export default function ItemCard({ item, cardWidth }) {
+export default function ItemCard({ item, cardWidth, onDetailsPress }) {
   const handleShare = async () => {
     try {
       await Share.share({
@@ -23,7 +23,7 @@ export default function ItemCard({ item, cardWidth }) {
         />
       </View>
       <View style={theme.buttonsContainer}>
-        <TouchableOpacity style={theme.detailsButton}>
+        <TouchableOpacity style={theme.detailsButton} onPress= {onDetailsPress}>
           <Text style={theme.detailsButtonText}>Details</Text>
         </TouchableOpacity>
         <TouchableOpacity style={theme.shareButton} onPress={handleShare}>
@@ -47,22 +47,5 @@ const styles = StyleSheet.create({
   image: {
     height: 195,
     resizeMode: 'cover',
-  },
-  detailsContainer: {
-    paddingTop: 8,
-    alignItems: 'center',
-  },
-  designerName: {
-    fontSize: 14,
-    fontWeight: 'bold',
-  },
-  productName: {
-    fontSize: 12,
-    color: '#666',
-  },
-  productPrice: {
-    fontSize: 14,
-    color: theme.primaryColor,
-    fontWeight: 'bold',
   },
 });
