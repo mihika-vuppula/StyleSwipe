@@ -1,9 +1,11 @@
+// src/components/ItemCard.js
+
 import React from 'react';
 import { View, Image, Text, TouchableOpacity, StyleSheet, Share } from 'react-native';
 import { theme } from '../styles/Theme';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
-export default function ItemCard({ item, cardWidth, onDetailsPress }) {
+export default function ItemCard({ item, cardWidth, onDetailsPress, onRemove }) {
   const handleShare = async () => {
     try {
       await Share.share({
@@ -23,12 +25,17 @@ export default function ItemCard({ item, cardWidth, onDetailsPress }) {
         />
       </View>
       <View style={theme.buttonsContainer}>
-        <TouchableOpacity style={theme.detailsButton} onPress= {onDetailsPress}>
+        <TouchableOpacity style={theme.detailsButton} onPress={onDetailsPress}>
           <Text style={theme.detailsButtonText}>Details</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={theme.shareButton} onPress={handleShare}>
-          <MaterialCommunityIcons name="share-outline" size={20} color="#333" />
-        </TouchableOpacity>
+        <View style={styles.iconButtonsContainer}>
+          <TouchableOpacity style={theme.iconButton} onPress={handleShare}>
+            <MaterialCommunityIcons name="share-outline" size={20} color="#333" />
+          </TouchableOpacity>
+          <TouchableOpacity style={theme.iconButton} onPress={onRemove}>
+            <MaterialCommunityIcons name="trash-can-outline" size={20} color="#333" />
+          </TouchableOpacity>
+        </View>
       </View>
     </View>
   );
@@ -47,5 +54,19 @@ const styles = StyleSheet.create({
   image: {
     height: 195,
     resizeMode: 'cover',
+  },
+  buttonsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 8,
+    width: '100%',
+  },
+  iconButtonsContainer: {
+    flexDirection: 'row',
+  },
+  iconButton: {
+    marginLeft: 8,
+    padding: 4,
   },
 });

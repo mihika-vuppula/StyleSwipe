@@ -1,10 +1,12 @@
+// src/components/OutfitCard.js
+
 import React, { useState } from 'react';
 import { View, Image, StyleSheet, Text, TouchableOpacity, Share } from 'react-native';
 import { theme } from '../styles/Theme';
 import DetailsModal from './DetailsModal';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
-export default function OutfitCard({ outfit, cardWidth }) {
+export default function OutfitCard({ outfit, cardWidth, onRemove }) {
   const [detailsVisible, setDetailsVisible] = useState(false);
 
   // Destructure with defaults to prevent errors if data is missing
@@ -36,7 +38,7 @@ export default function OutfitCard({ outfit, cardWidth }) {
 
   const shareLinks = async () => {
     const links = [
-    // Collect the available links
+      // Collect the available links
       top.productUrl ? `Top: ${top.productUrl}` : null,
       bottom.productUrl ? `Bottom: ${bottom.productUrl}` : null,
       shoes.productUrl ? `Shoes: ${shoes.productUrl}` : null,
@@ -87,9 +89,14 @@ export default function OutfitCard({ outfit, cardWidth }) {
           >
             <Text style={theme.detailsButtonText}>Details</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={theme.shareButton} onPress={shareLinks}>
-            <MaterialCommunityIcons name="share-outline" size={20} color="#333" />
-          </TouchableOpacity>
+          <View style={styles.iconButtonsContainer}>
+            <TouchableOpacity style={theme.iconButton} onPress={shareLinks}>
+              <MaterialCommunityIcons name="share-outline" size={20} color="#333" />
+            </TouchableOpacity>
+            <TouchableOpacity style={theme.iconButton} onPress={onRemove}>
+              <MaterialCommunityIcons name="trash-can-outline" size={20} color="#333" />
+            </TouchableOpacity>
+          </View>
         </View>
       </View>
 
@@ -127,5 +134,8 @@ const styles = StyleSheet.create({
     height: 100,
     borderRadius: 10,
     resizeMode: 'cover',
+  },
+  iconButtonsContainer: {
+    flexDirection: 'row',
   },
 });
