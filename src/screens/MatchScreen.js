@@ -1,4 +1,6 @@
-import React, { useEffect, useState, useContext } from 'react';
+// src/screens/MatchScreen.js
+
+import React, { useEffect, useState, useContext, useRef } from 'react';
 import {
   SafeAreaView,
   StyleSheet,
@@ -8,6 +10,7 @@ import {
   FlatList,
   Dimensions,
   ActivityIndicator,
+  Animated,
 } from 'react-native';
 import OutfitCard from '../components/OutfitCard.js';
 import ItemCard from '../components/ItemCard.js';
@@ -16,6 +19,8 @@ import { theme } from '../styles/Theme';
 import axios from 'axios';
 import { UserContext } from '../context/UserContext';
 import { useIsFocused } from '@react-navigation/native';
+import DetailsModal from '../components/DetailsModal';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const screenWidth = Dimensions.get('window').width;
 const cardWidth = (screenWidth - 64) / 2;
@@ -29,6 +34,26 @@ export default function MatchScreen({ navigation }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const isFocused = useIsFocused();
+  const [selectedItem, setSelectedItem] = useState(null);
+  const [detailsVisible, setDetailsVisible] = useState(false);
+
+  // State for Popup Notification
+  const [popupVisible, setPopupVisible] = useState(false);
+  const [popupMessage, setPopupMessage] = useState('');
+  const slideAnim = useRef(new Animated.Value(Dimensions.get('window').width)).current;
+
+  const REMOVED_ITEMS_KEY = `removed_items_${userId}`;
+  const REMOVED_OUTFITS_KEY = `removed_outfits_${userId}`;
+
+  const openDetails = (item) => {
+    setSelectedItem(item);
+    setDetailsVisible(true);
+  };
+
+  const closeDetails = () => {
+    setSelectedItem(null);
+    setDetailsVisible(false);
+  };
 
   useEffect(() => {
     if (!userId) {
@@ -38,14 +63,26 @@ export default function MatchScreen({ navigation }) {
     }
 
     if (isFocused) {
-      fetchMatches();
+      if (activeTab === 'trending') {
+        fetchTrending();
+      } else {
+        fetchMatches();
+      }
     }
-  }, [userId, isFocused]);
+  }, [userId, isFocused, activeTab]);
 
   const fetchMatches = async () => {
     setLoading(true);
     setError(null);
     try {
+      const [removedItemIds, removedOutfitIds] = await Promise.all([
+        AsyncStorage.getItem(REMOVED_ITEMS_KEY),
+        AsyncStorage.getItem(REMOVED_OUTFITS_KEY),
+      ]);
+
+      const removedItemsSet = new Set(JSON.parse(removedItemIds) || []);
+      const removedOutfitsSet = new Set(JSON.parse(removedOutfitIds) || []);
+
       const response = await axios.get(
         `https://2ox7hybif2.execute-api.us-east-1.amazonaws.com/dev/getLikedItems/${userId}`,
         {
@@ -54,8 +91,6 @@ export default function MatchScreen({ navigation }) {
           },
         }
       );
-
-      console.log('Fetched matches response:', response.data);
 
       let responseData = response.data;
 
@@ -73,21 +108,25 @@ export default function MatchScreen({ navigation }) {
 
       const { likedItems = [], likedOutfits = [] } = responseData;
 
-      const mappedItems = likedItems.map((item) => ({
-        itemId: item.itemId,
-        imageUrl: item.imageUrl,
-        productName: item.productName,
-        designerName: item.designerName,
-        productPrice: item.productPrice,
-        productUrl: item.productUrl,
-      }));
+      const mappedItems = likedItems
+        .filter((item) => !removedItemsSet.has(item.itemId))
+        .map((item) => ({
+          itemId: item.itemId,
+          imageUrl: item.imageUrl,
+          productName: item.productName,
+          designerName: item.designerName,
+          productPrice: item.productPrice,
+          productUrl: item.productUrl,
+        }));
 
-      const mappedOutfits = likedOutfits.map((outfit) => ({
-        matchId: outfit.matchId,
-        top: outfit.top,
-        bottom: outfit.bottom,
-        shoes: outfit.shoes,
-      }));
+      const mappedOutfits = likedOutfits
+        .filter((outfit) => !removedOutfitsSet.has(outfit.matchId))
+        .map((outfit) => ({
+          matchId: outfit.matchId,
+          top: outfit.top,
+          bottom: outfit.bottom,
+          shoes: outfit.shoes,
+        }));
 
       setItems(mappedItems);
       setOutfits(mappedOutfits);
@@ -115,20 +154,20 @@ export default function MatchScreen({ navigation }) {
     setError(null);
     try {
       const response = await axios.get(
-        'https://mec9qba05g.execute-api.us-east-1.amazonaws.com/dev/trending', // Your API Gateway URL
+        'https://mec9qba05g.execute-api.us-east-1.amazonaws.com/dev/trending',
         {
           headers: {
             'Content-Type': 'application/json',
           },
         }
       );
-  
+
       // Check if the body is a string or already parsed
       let responseBody = response.data.body;
       if (typeof responseBody === 'string') {
         responseBody = JSON.parse(responseBody); // Parse if it's a JSON string
       }
-  
+
       // Access the `trending` array
       const trendingItems = responseBody.trending.map((item) => ({
         itemId: item.itemId,
@@ -136,9 +175,10 @@ export default function MatchScreen({ navigation }) {
         productName: item.productName,
         designerName: item.designerName,
         productPrice: item.productPrice,
+        productUrl: item.productUrl,
         count: item.count,
       }));
-  
+
       setTrending(trendingItems);
     } catch (err) {
       console.error('Error fetching trending data:', err);
@@ -147,16 +187,129 @@ export default function MatchScreen({ navigation }) {
       setLoading(false);
     }
   };
-  
+
+  // Function to show popup notification
+  const showPopup = (message) => {
+    setPopupMessage(message);
+    setPopupVisible(true);
+    slideAnim.setValue(Dimensions.get('window').width);
+
+    Animated.timing(slideAnim, {
+      toValue: 0,
+      duration: 300,
+      useNativeDriver: true,
+    }).start();
+
+    setTimeout(() => {
+      setPopupVisible(false);
+    }, 1000);
+  };
+
+  // Function to remove an item from the 'items' state and store its ID
+  const removeItem = async (itemId) => {
+    setItems((prevItems) => prevItems.filter((item) => item.itemId !== itemId));
+
+    try {
+      const storedRemovedItems = await AsyncStorage.getItem(REMOVED_ITEMS_KEY);
+      const removedItems = storedRemovedItems ? JSON.parse(storedRemovedItems) : [];
+      removedItems.push(itemId);
+      await AsyncStorage.setItem(REMOVED_ITEMS_KEY, JSON.stringify(removedItems));
+    } catch (error) {
+      console.error('Error storing removed item ID:', error);
+    }
+  };
+
+  // Function to remove an outfit from the 'outfits' state and store its ID
+  const removeOutfit = async (matchId) => {
+    setOutfits((prevOutfits) => prevOutfits.filter((outfit) => outfit.matchId !== matchId));
+
+    try {
+      const storedRemovedOutfits = await AsyncStorage.getItem(REMOVED_OUTFITS_KEY);
+      const removedOutfits = storedRemovedOutfits ? JSON.parse(storedRemovedOutfits) : [];
+      removedOutfits.push(matchId);
+      await AsyncStorage.setItem(REMOVED_OUTFITS_KEY, JSON.stringify(removedOutfits));
+    } catch (error) {
+      console.error('Error storing removed outfit ID:', error);
+    }
+  };
 
   const renderOutfit = ({ item }) => {
     if (!item || !item.top || !item.bottom || !item.shoes) {
       return null;
     }
-    return <OutfitCard outfit={item} cardWidth={cardWidth} />;
+    return (
+      <OutfitCard
+        outfit={item}
+        cardWidth={cardWidth}
+        onRemove={() => removeOutfit(item.matchId)}
+      />
+    );
   };
 
-  const renderItem = ({ item }) => <ItemCard item={item} cardWidth={cardWidth} />;
+  const renderItem = ({ item }) => (
+    <ItemCard
+      item={item}
+      cardWidth={cardWidth}
+      onDetailsPress={() => openDetails(item)}
+      onRemove={() => removeItem(item.itemId)}
+    />
+  );
+
+  const renderTrendingItem = ({ item }) => (
+    <ItemCard
+      item={item}
+      cardWidth={cardWidth}
+      isTrending={true}
+      onDetailsPress={() => openDetails(item)}
+      onLike={() => handleLikeItem(item)}
+    />
+  );
+
+  const handleLikeItem = async (product) => {
+    if (!product || !product.itemId) {
+      console.error('Product is missing or invalid:', product);
+      return;
+    }
+
+    try {
+      console.log('Sending request to like item:', {
+        userId: userId,
+        itemId: product.itemId,
+        itemType: 'item', // Assuming 'item' as itemType
+        imageUrl: product.imageUrl,
+        productName: product.productName,
+        designerName: product.designerName,
+        productPrice: product.productPrice,
+        productUrl: product.productUrl,
+      });
+
+      // Call the like API
+      const response = await axios.post(
+        'https://2ox7hybif2.execute-api.us-east-1.amazonaws.com/dev/like-item',
+        {
+          userId: userId,
+          itemId: product.itemId,
+          itemType: 'item', // Assuming 'item' as itemType
+          imageUrl: product.imageUrl,
+          productName: product.productName,
+          designerName: product.designerName,
+          productPrice: product.productPrice,
+          productUrl: product.productUrl,
+        },
+        {
+          headers: { 'Content-Type': 'application/json' },
+        }
+      );
+
+      console.log('Like API Response:', response.data);
+      // Show success popup
+      showPopup('Item added to Your Fits!');
+    } catch (error) {
+      console.error('Error liking item:', error.response || error.message);
+      // Show error popup
+      showPopup('Error adding item to Your Fits');
+    }
+  };
 
   if (loading) {
     return (
@@ -229,7 +382,11 @@ export default function MatchScreen({ navigation }) {
             fetchTrending();
           }}
         >
-          <MaterialCommunityIcons name="fire" size={16} color={activeTab === 'trending' ? '#fff' : theme.primaryColor} />
+          <MaterialCommunityIcons
+            name="fire"
+            size={16}
+            color={activeTab === 'trending' ? '#fff' : theme.primaryColor}
+          />
           <Text style={[styles.tabText, activeTab === 'trending' && styles.activeText]}>
             Trending
           </Text>
@@ -250,22 +407,20 @@ export default function MatchScreen({ navigation }) {
           </View>
         )
       ) : activeTab === 'trending' ? (
-       
-          trending.length > 0 ? (
-            <FlatList
-              data={trending}
-              renderItem={({ item }) => <ItemCard item={item} cardWidth={cardWidth} isTrending={true} />}
-              keyExtractor={(item) => item.itemId.toString()}
-              key={activeTab}
-              numColumns={2}
-              contentContainerStyle={styles.flatListContainer}
-            />
-          ) : (
-            <View style={styles.messageContainer}>
-              <Text style={styles.messageText}>No trending items yet.</Text>
-            </View>
-          )
-        
+        trending.length > 0 ? (
+          <FlatList
+            data={trending}
+            renderItem={renderTrendingItem}
+            keyExtractor={(item) => item.itemId.toString()}
+            key={activeTab}
+            numColumns={2}
+            contentContainerStyle={styles.flatListContainer}
+          />
+        ) : (
+          <View style={styles.messageContainer}>
+            <Text style={styles.messageText}>No trending items yet.</Text>
+          </View>
+        )
       ) : items.length > 0 ? (
         <FlatList
           data={items}
@@ -278,6 +433,13 @@ export default function MatchScreen({ navigation }) {
         <View style={styles.messageContainer}>
           <Text style={styles.messageText}>You have not liked any items yet.</Text>
         </View>
+      )}
+      <DetailsModal visible={detailsVisible} onClose={closeDetails} item={selectedItem} />
+      {popupVisible && (
+        <Animated.View style={[styles.popup, { transform: [{ translateX: slideAnim }] }]}>
+          <MaterialIcons name="favorite" size={24} color={theme.primaryColor} />
+          <Text style={styles.popupText}>{popupMessage}</Text>
+        </Animated.View>
       )}
     </SafeAreaView>
   );
@@ -335,5 +497,24 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  // Styles for Popup Notification
+  popup: {
+    position: 'absolute',
+    alignSelf: 'center',
+    bottom: '10%',
+    backgroundColor: '#fff',
+    borderRadius: 30,
+    borderWidth: 1,
+    borderColor: theme.primaryColor,
+    padding: 15,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  popupText: {
+    marginLeft: 10,
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: theme.primaryColor,
   },
 });

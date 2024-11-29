@@ -1,3 +1,5 @@
+// src/styles/Theme.js
+
 const secondaryColor = '#adafbb';
 
 export const theme = {
@@ -9,13 +11,13 @@ export const theme = {
     container: {
         flex: 1,
         backgroundColor: '#fff',
-      },
+    },
     header: {
         flexDirection: 'row',
         alignItems: 'center',
         paddingHorizontal: 30,
         marginTop: 40,
-      },
+    },
     title: {
         fontSize: 24,
         fontWeight: 'bold',
@@ -29,32 +31,35 @@ export const theme = {
         borderRadius: 8,
     },
     buttonsContainer: {
-      flexDirection: 'row',
-      justifyContent: 'space-around',
-      paddingVertical: 10,
-      width: '100%',
-  },
-  detailsButton: {
-      borderWidth: 1,
-      borderColor: secondaryColor,
-      paddingVertical: 6,
-      paddingHorizontal: 20,
-      borderRadius: 20,
-      alignItems: 'center',
-      flex: 1,
-      marginRight: 8,
-  },
-  detailsButtonText: {
-      fontSize: 12,
-      fontWeight: 'bold',
-  },
-  shareButton: {
-      borderWidth: 1,
-      borderColor: secondaryColor,
-      padding: 6,
-      borderRadius: 20,
-      alignItems: 'center',
-      justifyContent: 'center',
-  },
+        flexDirection: 'row',
+        justifyContent: 'space-between', // Adjusted to space buttons appropriately
+        alignItems: 'center',            // Align items vertically centered
+        paddingVertical: 10,
+        width: '100%',
+        marginTop: 8,                    // Added marginTop for spacing
+    },
+    detailsButton: {
+        borderWidth: 1,
+        borderColor: secondaryColor,
+        paddingVertical: 6,
+        paddingHorizontal: 10,
+        borderRadius: 20,
+        alignItems: 'center',
+        flex: 1,
+        marginRight: 8,                  // Adjusted marginRight for consistent spacing
+    },
+    detailsButtonText: {
+        fontSize: 12,
+        fontWeight: 'bold',
+    },
+    iconButton: {
+        marginLeft: 8,                   // Space between icons
+        padding: 4,
+        borderWidth: 1,
+        borderColor: secondaryColor,
+        borderRadius: 20,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    // Removed 'shareButton' since 'iconButton' can be used for both icons
 };
-  
