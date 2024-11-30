@@ -1,6 +1,4 @@
-// src/screens/SwipeScreen.js
-
-import React, { useState, useRef, useContext } from 'react';
+import React, { useState, useRef, useContext, useEffect } from 'react';
 import {
   View,
   Text,
@@ -34,21 +32,47 @@ export default function SwipeScreen() {
 
   const slideAnim = useRef(new Animated.Value(Dimensions.get('window').width)).current;
 
-  const {
-    product: topsProduct,
-    loading: topsLoading,
-    error: topsError,
-  } = useFetchRandomProduct([13317, 13332], topsRefresh);
-  const {
-    product: bottomsProduct,
-    loading: bottomsLoading,
-    error: bottomsError,
-  } = useFetchRandomProduct([13281, 13297, 13302, 13377], bottomsRefresh);
-  const {
-    product: shoesProduct,
-    loading: shoesLoading,
-    error: shoesError,
-  } = useFetchRandomProduct([13438], shoesRefresh);
+  const categoryMapping = {
+    tops: {
+      "Sweaters & Knits": 13317,
+      Tops: 13332,
+    },
+    bottoms: {
+      Jeans: 13377,
+      Pants: 13281,
+      Shorts: 13297,
+      Skirts: 13302,
+    },
+    footwear: {
+      Boots: 13460,
+      Flats: 13455,
+      Pumps: 13449,
+      "Rain & Winter Boots": 13490,
+      Sandals: 13441,
+      "Sneakers & Athletic": 13439,
+    },
+  };
+
+  const whatsNewMapping = {
+    tops: {
+      "Sweaters & Knits": 13244,
+      Tops: 13252,
+    },
+    bottoms: {
+      Jeans: 13255,
+      Pants: 13247,
+      Shorts: 13245,
+      Skirts: 13246,
+    },
+    footwear: {
+      Boots: 13205,
+      Flats: 13204,
+      Pumps: 13203,
+      "Rain Boots": 28966,
+      Sandals: 13202,
+      Sneakers: 13200,
+    },
+  };
 
   const [filterVisible, setFilterVisible] = useState(false);
 
@@ -73,12 +97,54 @@ export default function SwipeScreen() {
   const toggleIsNew = () => {
     setIsNew((prev) => !prev);
   };
+  
+  const getMappedCategories = (selectedItems, categoryType) => {
+    const mapping = isNew ? whatsNewMapping[categoryType] : categoryMapping[categoryType];
+    const mappedCategories = Array.isArray(selectedItems) && selectedItems.length > 0
+      ? selectedItems.map((item) => mapping[item])
+      : Object.values(mapping);
+    return mappedCategories;
+  };
+  
+  const topsCategories = getMappedCategories(selectedTops, 'tops');
+  const bottomsCategories = getMappedCategories(selectedBottoms, 'bottoms');
+  const footwearCategories = getMappedCategories(selectedFootwears, 'footwear');
+
+  const {
+    product: topsProduct,
+    loading: topsLoading,
+    error: topsError,
+  } = useFetchRandomProduct(topsCategories, topsRefresh);
+
+  const {
+    product: bottomsProduct,
+    loading: bottomsLoading,
+    error: bottomsError,
+  } = useFetchRandomProduct(bottomsCategories, bottomsRefresh);
+
+  const {
+    product: shoesProduct,
+    loading: shoesLoading,
+    error: shoesError,
+  } = useFetchRandomProduct(footwearCategories, shoesRefresh);
 
   const refreshProduct = (boxNumber) => {
     if (boxNumber === 1) setTopsRefresh((prev) => prev + 1);
     if (boxNumber === 2) setBottomsRefresh((prev) => prev + 1);
     if (boxNumber === 3) setShoesRefresh((prev) => prev + 1);
   };
+
+  useEffect(() => {
+    setTopsRefresh((prev) => prev + 1);
+  }, [selectedTops]);
+
+  useEffect(() => {
+    setBottomsRefresh((prev) => prev + 1);
+  }, [selectedBottoms]);
+
+  useEffect(() => {
+    setShoesRefresh((prev) => prev + 1);
+  }, [selectedFootwears]);
 
   const showPopup = (message) => {
     setPopupMessage(message);
@@ -118,33 +184,12 @@ export default function SwipeScreen() {
     }
 
     try {
-      console.log('Sending request to like item:', {
-        userId: userId,
-        itemId: product.itemId,
-        itemType: itemType,
-        imageUrl: product.imageUrl1,
-        productName: product.productName,
-        designerName: product.designerName,
-        productPrice: product.productPrice,
-        productUrl: product.productUrl
-      });
+      console.log('Sending request to like item:', { userId, ...product, itemType });
 
-      // Call the like API
       const response = await axios.post(
         'https://2ox7hybif2.execute-api.us-east-1.amazonaws.com/dev/like-item',
-        {
-          userId: userId,
-          itemId: product.itemId,
-          itemType: itemType,
-          imageUrl: product.imageUrl1,
-          productName: product.productName,
-          designerName: product.designerName,
-          productPrice: product.productPrice,
-          productUrl: product.productUrl
-        },
-        {
-          headers: { 'Content-Type': 'application/json' },
-        }
+        { userId, ...product, itemType },
+        { headers: { 'Content-Type': 'application/json' } }
       );
 
       console.log('Like API Response:', response.data);
@@ -154,7 +199,6 @@ export default function SwipeScreen() {
       showPopup('Error adding item to your fits');
     }
 
-    // Refresh the product
     refreshProduct(boxNumber);
   };
 
@@ -163,51 +207,23 @@ export default function SwipeScreen() {
       showPopup('Please make sure all items are loaded');
       return;
     }
-  
+
     try {
       const outfitData = {
-        userId: userId,
-        top: {
-          itemId: topsProduct.itemId,
-          itemType: 'top',
-          imageUrl: topsProduct.imageUrl1,
-          productName: topsProduct.productName,
-          designerName: topsProduct.designerName,
-          productPrice: topsProduct.productPrice,
-          productUrl: topsProduct.productUrl
-        },
-        bottom: {
-          itemId: bottomsProduct.itemId,
-          itemType: 'bottom',
-          imageUrl: bottomsProduct.imageUrl1,
-          productName: bottomsProduct.productName,
-          designerName: bottomsProduct.designerName,
-          productPrice: bottomsProduct.productPrice,
-          productUrl: bottomsProduct.productUrl
-        },
-        shoes: {
-          itemId: shoesProduct.itemId,
-          itemType: 'shoes',
-          imageUrl: shoesProduct.imageUrl1,
-          productName: shoesProduct.productName,
-          designerName: shoesProduct.designerName,
-          productPrice: shoesProduct.productPrice,
-          productUrl: shoesProduct.productUrl
-
-        },
+        userId,
+        top: topsProduct,
+        bottom: bottomsProduct,
+        shoes: shoesProduct,
       };
-  
+
       console.log('Sending request to create outfit:', outfitData);
-  
-      // Explicitly stringify the data
+
       const response = await axios.post(
         'https://2ox7hybif2.execute-api.us-east-1.amazonaws.com/dev/create-fit',
-        JSON.stringify(outfitData), // Stringify the outfitData
-        {
-          headers: { 'Content-Type': 'application/json' },
-        }
+        outfitData,
+        { headers: { 'Content-Type': 'application/json' } }
       );
-  
+
       console.log('Create Outfit API Response:', response.data);
       showPopup('YAY! Outfit Added To Your Fits');
     } catch (error) {
@@ -215,7 +231,6 @@ export default function SwipeScreen() {
       showPopup('Error adding outfit to your fits');
     }
   };
-  
 
   const renderProductBox = (product, loading, error, boxNumber) => (
     <View style={styles.boxContainer}>
@@ -230,15 +245,7 @@ export default function SwipeScreen() {
         ) : (
           product && (
             <View style={styles.productContainer}>
-              <Image
-                source={{ uri: product.imageUrl1 }}
-                style={[
-                  styles.productImage,
-                  boxNumber === 1 && styles.topImage,
-                  boxNumber === 2 && styles.bottomImage,
-                  boxNumber === 3 && styles.shoeImage,
-                ]}
-              />
+              <Image source={{ uri: product.imageUrl1 }} style={styles.productImage} />
               <View style={styles.overlay}>
                 <View style={styles.row}>
                   <Text style={styles.designerName}>{product.designerName}</Text>
@@ -300,6 +307,7 @@ export default function SwipeScreen() {
     </SafeAreaView>
   );
 }
+
 
 const styles = StyleSheet.create({
   middleContent: {
