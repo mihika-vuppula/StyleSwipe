@@ -114,19 +114,20 @@ export default function SwipeScreen() {
     product: topsProduct,
     loading: topsLoading,
     error: topsError,
-  } = useFetchRandomProduct(topsCategories, topsRefresh);
-
+  } = useFetchRandomProduct(topsCategories, topsRefresh, minPrice, maxPrice);
+  
   const {
     product: bottomsProduct,
     loading: bottomsLoading,
     error: bottomsError,
-  } = useFetchRandomProduct(bottomsCategories, bottomsRefresh);
-
+  } = useFetchRandomProduct(bottomsCategories, bottomsRefresh, minPrice, maxPrice);
+  
   const {
     product: shoesProduct,
     loading: shoesLoading,
     error: shoesError,
-  } = useFetchRandomProduct(footwearCategories, shoesRefresh);
+  } = useFetchRandomProduct(footwearCategories, shoesRefresh, minPrice, maxPrice);
+  
 
   const refreshProduct = (boxNumber) => {
     if (boxNumber === 1) setTopsRefresh((prev) => prev + 1);
@@ -184,12 +185,33 @@ export default function SwipeScreen() {
     }
 
     try {
-      console.log('Sending request to like item:', { userId, ...product, itemType });
+      console.log('Sending request to like item:', {
+        userId: userId,
+        itemId: product.itemId,
+        itemType: itemType,
+        imageUrl: product.imageUrl1,
+        productName: product.productName,
+        designerName: product.designerName,
+        productPrice: product.productPrice,
+        productUrl: product.productUrl
+      });
 
+      // Call the like API
       const response = await axios.post(
         'https://2ox7hybif2.execute-api.us-east-1.amazonaws.com/dev/like-item',
-        { userId, ...product, itemType },
-        { headers: { 'Content-Type': 'application/json' } }
+        {
+          userId: userId,
+          itemId: product.itemId,
+          itemType: itemType,
+          imageUrl: product.imageUrl1,
+          productName: product.productName,
+          designerName: product.designerName,
+          productPrice: product.productPrice,
+          productUrl: product.productUrl
+        },
+        {
+          headers: { 'Content-Type': 'application/json' },
+        }
       );
 
       console.log('Like API Response:', response.data);
@@ -199,6 +221,7 @@ export default function SwipeScreen() {
       showPopup('Error adding item to your fits');
     }
 
+    // Refresh the product
     refreshProduct(boxNumber);
   };
 
@@ -207,13 +230,38 @@ export default function SwipeScreen() {
       showPopup('Please make sure all items are loaded');
       return;
     }
-
+  
     try {
       const outfitData = {
-        userId,
-        top: topsProduct,
-        bottom: bottomsProduct,
-        shoes: shoesProduct,
+        userId: userId,
+        top: {
+          itemId: topsProduct.itemId,
+          itemType: 'top',
+          imageUrl: topsProduct.imageUrl1,
+          productName: topsProduct.productName,
+          designerName: topsProduct.designerName,
+          productPrice: topsProduct.productPrice,
+          productUrl: topsProduct.productUrl
+        },
+        bottom: {
+          itemId: bottomsProduct.itemId,
+          itemType: 'bottom',
+          imageUrl: bottomsProduct.imageUrl1,
+          productName: bottomsProduct.productName,
+          designerName: bottomsProduct.designerName,
+          productPrice: bottomsProduct.productPrice,
+          productUrl: bottomsProduct.productUrl
+        },
+        shoes: {
+          itemId: shoesProduct.itemId,
+          itemType: 'shoes',
+          imageUrl: shoesProduct.imageUrl1,
+          productName: shoesProduct.productName,
+          designerName: shoesProduct.designerName,
+          productPrice: shoesProduct.productPrice,
+          productUrl: shoesProduct.productUrl
+
+        },
       };
 
       console.log('Sending request to create outfit:', outfitData);
