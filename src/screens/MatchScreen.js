@@ -162,13 +162,11 @@ export default function MatchScreen({ navigation }) {
         }
       );
 
-      // Check if the body is a string or already parsed
       let responseBody = response.data.body;
       if (typeof responseBody === 'string') {
-        responseBody = JSON.parse(responseBody); // Parse if it's a JSON string
+        responseBody = JSON.parse(responseBody);
       }
 
-      // Access the `trending` array
       const trendingItems = responseBody.trending.map((item) => ({
         itemId: item.itemId,
         imageUrl: item.imageUrl,
@@ -203,6 +201,43 @@ export default function MatchScreen({ navigation }) {
     setTimeout(() => {
       setPopupVisible(false);
     }, 1000);
+  };
+
+  const handleLikeItem = async (product) => {
+    if (!product || !product.itemId) {
+      console.error('Product is missing or invalid:', product);
+      return;
+    }
+  
+    try {
+      // Send a POST request to the /trending endpoint to like the item
+      const response = await axios.post(
+        'https://mec9qba05g.execute-api.us-east-1.amazonaws.com/dev/trending',
+        {
+          action: 'like',
+          userId: userId,
+          itemId: product.itemId,
+          itemType: 'item', // Include itemType
+          imageUrl: product.imageUrl,
+          productName: product.productName,
+          designerName: product.designerName,
+          productPrice: product.productPrice,
+          productUrl: product.productUrl,
+        },
+        {
+          headers: { 'Content-Type': 'application/json' },
+        }
+      );
+  
+      console.log('Like API Response:', response.data);
+      // Show success popup
+      showPopup('Item added to Your Fits!');
+  
+    } catch (error) {
+      console.error('Error liking item:', error.response || error.message);
+      // Show error popup
+      showPopup('Error adding item to Your Fits');
+    }
   };
 
   // Function to remove an item from the 'items' state and store its ID
@@ -260,56 +295,9 @@ export default function MatchScreen({ navigation }) {
       item={item}
       cardWidth={cardWidth}
       isTrending={true}
-      onDetailsPress={() => openDetails(item)}
       onLike={() => handleLikeItem(item)}
     />
   );
-
-  const handleLikeItem = async (product) => {
-    if (!product || !product.itemId) {
-      console.error('Product is missing or invalid:', product);
-      return;
-    }
-
-    try {
-      console.log('Sending request to like item:', {
-        userId: userId,
-        itemId: product.itemId,
-        itemType: 'item', // Assuming 'item' as itemType
-        imageUrl: product.imageUrl,
-        productName: product.productName,
-        designerName: product.designerName,
-        productPrice: product.productPrice,
-        productUrl: product.productUrl,
-      });
-
-      // Call the like API
-      const response = await axios.post(
-        'https://2ox7hybif2.execute-api.us-east-1.amazonaws.com/dev/like-item',
-        {
-          userId: userId,
-          itemId: product.itemId,
-          itemType: 'item', // Assuming 'item' as itemType
-          imageUrl: product.imageUrl,
-          productName: product.productName,
-          designerName: product.designerName,
-          productPrice: product.productPrice,
-          productUrl: product.productUrl,
-        },
-        {
-          headers: { 'Content-Type': 'application/json' },
-        }
-      );
-
-      console.log('Like API Response:', response.data);
-      // Show success popup
-      showPopup('Item added to Your Fits!');
-    } catch (error) {
-      console.error('Error liking item:', error.response || error.message);
-      // Show error popup
-      showPopup('Error adding item to Your Fits');
-    }
-  };
 
   if (loading) {
     return (

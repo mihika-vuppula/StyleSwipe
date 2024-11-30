@@ -5,11 +5,18 @@ import { View, Image, Text, TouchableOpacity, StyleSheet, Share } from 'react-na
 import { MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
 import { theme } from '../styles/Theme';
 
-export default function ItemCard({ item, cardWidth, isTrending, onDetailsPress, onRemove, onLike }) {
+export default function ItemCard({
+  item,
+  cardWidth,
+  isTrending,
+  onDetailsPress,
+  onRemove,
+  onLike,
+}) {
   const handleShare = async () => {
     try {
       await Share.share({
-        message: `Shop this item: ${item.productUrl}`,
+        message: `Check out this item: ${item.productUrl}`,
       });
     } catch (error) {
       console.error('Error sharing the URL:', error.message);
@@ -29,21 +36,23 @@ export default function ItemCard({ item, cardWidth, isTrending, onDetailsPress, 
           </TouchableOpacity>
         )}
       </View>
-      <View style={theme.buttonsContainer}>
-        <TouchableOpacity style={theme.detailsButton} onPress={onDetailsPress}>
-          <Text style={theme.detailsButtonText}>Details</Text>
-        </TouchableOpacity>
-        <View style={styles.iconButtonsContainer}>
-          <TouchableOpacity style={theme.iconButton} onPress={handleShare}>
-            <MaterialCommunityIcons name="share-outline" size={20} color="#333" />
+      {!isTrending && (
+        <View style={theme.buttonsContainer}>
+          <TouchableOpacity style={theme.detailsButton} onPress={onDetailsPress}>
+            <Text style={theme.detailsButtonText}>Details</Text>
           </TouchableOpacity>
-          {!isTrending && onRemove && (
-            <TouchableOpacity style={theme.iconButton} onPress={onRemove}>
-              <MaterialCommunityIcons name="trash-can-outline" size={20} color="#333" />
+          <View style={styles.iconButtonsContainer}>
+            <TouchableOpacity style={theme.iconButton} onPress={handleShare}>
+              <MaterialCommunityIcons name="share-outline" size={20} color="#333" />
             </TouchableOpacity>
-          )}
+            {onRemove && (
+              <TouchableOpacity style={theme.iconButton} onPress={onRemove}>
+                <MaterialCommunityIcons name="trash-can-outline" size={20} color="#333" />
+              </TouchableOpacity>
+            )}
+          </View>
         </View>
-      </View>
+      )}
     </View>
   );
 }
