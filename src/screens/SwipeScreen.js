@@ -1,6 +1,4 @@
-// src/screens/SwipeScreen.js
-
-import React, { useState, useRef, useContext } from 'react';
+import React, { useState, useRef, useContext, useEffect } from 'react';
 import {
   View,
   Text,
@@ -34,27 +32,52 @@ export default function SwipeScreen() {
 
   const slideAnim = useRef(new Animated.Value(Dimensions.get('window').width)).current;
 
-  const {
-    product: topsProduct,
-    loading: topsLoading,
-    error: topsError,
-  } = useFetchRandomProduct([13317, 13332], topsRefresh);
-  const {
-    product: bottomsProduct,
-    loading: bottomsLoading,
-    error: bottomsError,
-  } = useFetchRandomProduct([13281, 13297, 13302, 13377], bottomsRefresh);
-  const {
-    product: shoesProduct,
-    loading: shoesLoading,
-    error: shoesError,
-  } = useFetchRandomProduct([13438], shoesRefresh);
+  const categoryMapping = {
+    tops: {
+      "Sweaters & Knits": 13317,
+      Tops: 13332,
+    },
+    bottoms: {
+      Jeans: 13377,
+      Pants: 13281,
+      Shorts: 13297,
+      Skirts: 13302,
+    },
+    footwear: {
+      Boots: 13460,
+      Flats: 13455,
+      Pumps: 13449,
+      "Rain & Winter Boots": 13490,
+      Sandals: 13441,
+      "Sneakers & Athletic": 13439,
+    },
+  };
+
+  const whatsNewMapping = {
+    tops: {
+      "Sweaters & Knits": 13244,
+      Tops: 13252,
+    },
+    bottoms: {
+      Jeans: 13255,
+      Pants: 13247,
+      Shorts: 13245,
+      Skirts: 13246,
+    },
+    footwear: {
+      Boots: 13205,
+      Flats: 13204,
+      Pumps: 13203,
+      "Rain Boots": 28966,
+      Sandals: 13202,
+      Sneakers: 13200,
+    },
+  };
 
   const [filterVisible, setFilterVisible] = useState(false);
 
   const [minPrice, setMinPrice] = useState('');
   const [maxPrice, setMaxPrice] = useState('');
-  const [selectedDesigners, setSelectedDesigners] = useState([]);
   const [selectedTops, setSelectedTops] = useState([]);
   const [selectedBottoms, setSelectedBottoms] = useState([]);
   const [selectedFootwears, setSelectedFootwears] = useState([]);
@@ -63,22 +86,60 @@ export default function SwipeScreen() {
   const clearFilters = () => {
     setMinPrice('');
     setMaxPrice('');
-    setSelectedDesigners([]);
     setSelectedTops([]);
     setSelectedBottoms([]);
     setSelectedFootwears([]);
     setIsNew(false);
   };
-
-  const toggleIsNew = () => {
-    setIsNew((prev) => !prev);
+  
+  const getMappedCategories = (selectedItems, categoryType) => {
+    const mapping = isNew ? whatsNewMapping[categoryType] : categoryMapping[categoryType];
+    const mappedCategories = Array.isArray(selectedItems) && selectedItems.length > 0
+      ? selectedItems.map((item) => mapping[item])
+      : Object.values(mapping);
+    return mappedCategories;
   };
+  
+  const topsCategories = getMappedCategories(selectedTops, 'tops');
+  const bottomsCategories = getMappedCategories(selectedBottoms, 'bottoms');
+  const footwearCategories = getMappedCategories(selectedFootwears, 'footwear');
+
+  const {
+    product: topsProduct,
+    loading: topsLoading,
+    error: topsError,
+  } = useFetchRandomProduct(topsCategories, topsRefresh, minPrice, maxPrice);
+  
+  const {
+    product: bottomsProduct,
+    loading: bottomsLoading,
+    error: bottomsError,
+  } = useFetchRandomProduct(bottomsCategories, bottomsRefresh, minPrice, maxPrice);
+  
+  const {
+    product: shoesProduct,
+    loading: shoesLoading,
+    error: shoesError,
+  } = useFetchRandomProduct(footwearCategories, shoesRefresh, minPrice, maxPrice);
+  
 
   const refreshProduct = (boxNumber) => {
     if (boxNumber === 1) setTopsRefresh((prev) => prev + 1);
     if (boxNumber === 2) setBottomsRefresh((prev) => prev + 1);
     if (boxNumber === 3) setShoesRefresh((prev) => prev + 1);
   };
+
+  useEffect(() => {
+    setTopsRefresh((prev) => prev + 1);
+  }, [selectedTops]);
+
+  useEffect(() => {
+    setBottomsRefresh((prev) => prev + 1);
+  }, [selectedBottoms]);
+
+  useEffect(() => {
+    setShoesRefresh((prev) => prev + 1);
+  }, [selectedFootwears]);
 
   const showPopup = (message) => {
     setPopupMessage(message);
@@ -196,18 +257,15 @@ export default function SwipeScreen() {
 
         },
       };
-  
+
       console.log('Sending request to create outfit:', outfitData);
-  
-      // Explicitly stringify the data
+
       const response = await axios.post(
         'https://2ox7hybif2.execute-api.us-east-1.amazonaws.com/dev/create-fit',
-        JSON.stringify(outfitData), // Stringify the outfitData
-        {
-          headers: { 'Content-Type': 'application/json' },
-        }
+        outfitData,
+        { headers: { 'Content-Type': 'application/json' } }
       );
-  
+
       console.log('Create Outfit API Response:', response.data);
       showPopup('YAY! Outfit Added To Your Fits');
     } catch (error) {
@@ -215,7 +273,6 @@ export default function SwipeScreen() {
       showPopup('Error adding outfit to your fits');
     }
   };
-  
 
   const renderProductBox = (product, loading, error, boxNumber) => (
     <View style={styles.boxContainer}>
@@ -230,15 +287,7 @@ export default function SwipeScreen() {
         ) : (
           product && (
             <View style={styles.productContainer}>
-              <Image
-                source={{ uri: product.imageUrl1 }}
-                style={[
-                  styles.productImage,
-                  boxNumber === 1 && styles.topImage,
-                  boxNumber === 2 && styles.bottomImage,
-                  boxNumber === 3 && styles.shoeImage,
-                ]}
-              />
+              <Image source={{ uri: product.imageUrl1 }} style={styles.productImage} />
               <View style={styles.overlay}>
                 <View style={styles.row}>
                   <Text style={styles.designerName}>{product.designerName}</Text>
@@ -280,8 +329,6 @@ export default function SwipeScreen() {
         setMinPrice={setMinPrice}
         setMaxPrice={setMaxPrice}
         clearFilters={clearFilters}
-        selectedDesigners={selectedDesigners}
-        setSelectedDesigners={setSelectedDesigners}
         selectedTops={selectedTops}
         setSelectedTops={setSelectedTops}
         selectedBottoms={selectedBottoms}
@@ -289,7 +336,7 @@ export default function SwipeScreen() {
         selectedFootwears={selectedFootwears}
         setSelectedFootwears={setSelectedFootwears}
         isNew={isNew}
-        toggleIsNew={toggleIsNew}
+        setIsNew={setIsNew}
       />
       {popupVisible && (
         <Animated.View style={[styles.popup, { transform: [{ translateX: slideAnim }] }]}>
@@ -300,6 +347,7 @@ export default function SwipeScreen() {
     </SafeAreaView>
   );
 }
+
 
 const styles = StyleSheet.create({
   middleContent: {

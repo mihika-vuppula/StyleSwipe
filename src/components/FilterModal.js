@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -10,52 +10,52 @@ import {
   Alert,
 } from 'react-native';
 import { theme } from '../styles/Theme';
-import designerNames from '../constant/DesignerNames.json';
 
 export default function FilterModal({
   visible,
   onClose,
-  minPrice: initialMinPrice,
-  maxPrice: initialMaxPrice,
+  minPrice,
+  maxPrice,
   setMinPrice,
   setMaxPrice,
   clearFilters,
-  selectedDesigners: initialSelectedDesigners = [],
-  setSelectedDesigners,
-  selectedTops: initialSelectedTops = [],
+  selectedTops = [],
   setSelectedTops,
-  selectedBottoms: initialSelectedBottoms = [],
+  selectedBottoms = [],
   setSelectedBottoms,
-  selectedFootwears: initialSelectedFootwears = [],
+  selectedFootwears = [],
   setSelectedFootwears,
-  isNew: initialIsNew,
-  toggleIsNew,
+  isNew,
+  setIsNew
 }) {
+  const [tempMinPrice, setTempMinPrice] = useState(minPrice);
+  const [tempMaxPrice, setTempMaxPrice] = useState(maxPrice);
+  const [tempSelectedTops, setTempSelectedTops] = useState([...selectedTops]);
+  const [tempSelectedBottoms, setTempSelectedBottoms] = useState([...selectedBottoms]);
+  const [tempSelectedFootwears, setTempSelectedFootwears] = useState([...selectedFootwears]);
+  const [tempIsNew, setTempIsNew] = useState(isNew);
+
   const [showDropdown, setShowDropdown] = useState(null);
 
-  // Local states to track temporary filter changes
-  const [tempMinPrice, setTempMinPrice] = useState(initialMinPrice);
-  const [tempMaxPrice, setTempMaxPrice] = useState(initialMaxPrice);
-  const [tempSelectedDesigners, setTempSelectedDesigners] = useState(initialSelectedDesigners);
-  const [tempSelectedTops, setTempSelectedTops] = useState(initialSelectedTops);
-  const [tempSelectedBottoms, setTempSelectedBottoms] = useState(initialSelectedBottoms);
-  const [tempSelectedFootwears, setTempSelectedFootwears] = useState(initialSelectedFootwears);
-  const [tempIsNew, setTempIsNew] = useState(initialIsNew);
-
   const footwearCategories = [
-    "Boots",
-    "Clogs",
-    "Espadrilles",
-    "Flats",
-    "Pumps",
-    "Rain & Winter Boots",
-    "Sandals",
-    "Sneakers & Athletic",
-    "Designer Boutique",
-    "Edged Up Shoes",
-    "Kitten Heels",
-    "Ballet Flats",
+    'Boots',
+    'Flats',
+    'Pumps',
+    'Rain & Winter Boots',
+    'Sandals',
+    'Sneakers & Athletic',
   ];
+
+  useEffect(() => {
+    if (visible) {
+      setTempMinPrice(minPrice);
+      setTempMaxPrice(maxPrice);
+      setTempSelectedTops([...selectedTops]);
+      setTempSelectedBottoms([...selectedBottoms]);
+      setTempSelectedFootwears([...selectedFootwears]);
+      setTempIsNew(isNew);
+    }
+  }, [visible]);
 
   const toggleSelection = (array, setArray, value) => {
     if (array.includes(value)) {
@@ -63,6 +63,59 @@ export default function FilterModal({
     } else {
       setArray([...array, value]);
     }
+  };
+
+  const handleApplyFilters = () => {
+    console.log("tempIsNew before applying filters:", tempIsNew);
+    if (tempMinPrice !== '' || tempMaxPrice !== '') {
+      const minPrice = parseFloat(tempMinPrice);
+      const maxPrice = parseFloat(tempMaxPrice);
+
+      if (!isNaN(minPrice) && minPrice < 0) {
+        Alert.alert("Invalid Minimum Price", "Minimum price must be greater than or equal to 0.");
+        return;
+      }
+
+      if (!isNaN(minPrice) && !isNaN(maxPrice) && maxPrice <= minPrice) {
+        Alert.alert(
+          "Invalid Maximum Price",
+          "Maximum price must be greater than the minimum price."
+        );
+        return;
+      }
+
+      if (isNaN(minPrice) || isNaN(maxPrice)) {
+        Alert.alert("Invalid Input", "Please enter valid numeric values for the prices.");
+        return;
+      }
+    }
+
+    setMinPrice(tempMinPrice);
+    setMaxPrice(tempMaxPrice);
+    setSelectedTops(tempSelectedTops);
+    setSelectedBottoms(tempSelectedBottoms);
+    setSelectedFootwears(tempSelectedFootwears);
+
+    setIsNew(tempIsNew);
+
+    setShowDropdown(null);
+    onClose();
+  };
+
+  const handleClearFilters = () => {
+    setTempMinPrice('');
+    setTempMaxPrice('');
+    setTempSelectedTops([]);
+    setTempSelectedBottoms([]);
+    setTempSelectedFootwears([]);
+    setTempIsNew(false);
+  
+    setShowDropdown(null);
+  };
+
+  const handleCloseModal = () => {
+    setShowDropdown(null);
+    onClose(); 
   };
 
   const renderDropdownItem = (options, selectedArray, setArray) => (
@@ -90,9 +143,7 @@ export default function FilterModal({
         onPress={() => setShowDropdown(showDropdown === dropdownKey ? null : dropdownKey)}
       >
         <Text style={styles.dropdownText}>
-          {Array.isArray(selectedArray) && selectedArray.length > 0
-            ? selectedArray.join(', ')
-            : 'Select'}
+          {selectedArray.length > 0 ? selectedArray.join(', ') : 'Select'}
         </Text>
         <Text style={styles.dropdownArrow}>{showDropdown === dropdownKey ? '▲' : '▼'}</Text>
       </TouchableOpacity>
@@ -104,72 +155,12 @@ export default function FilterModal({
     </View>
   );
 
-  const handleApplyFilters = () => {
-    if (tempMinPrice !== '' || tempMaxPrice !== '') {
-      const minPrice = parseFloat(tempMinPrice);
-      const maxPrice = parseFloat(tempMaxPrice);
-
-      if (!isNaN(minPrice) && minPrice < 0) {
-        Alert.alert("Invalid Minimum Price", "Minimum price must be greater than or equal to 0.");
-        return;
-      }
-
-      if (!isNaN(minPrice) && !isNaN(maxPrice) && maxPrice <= minPrice) {
-        Alert.alert(
-          "Invalid Maximum Price",
-          "Maximum price must be greater than the minimum price."
-        );
-        return;
-      }
-
-      if (isNaN(minPrice) || isNaN(maxPrice)) {
-        Alert.alert("Invalid Input", "Please enter valid numeric values for the prices.");
-        return;
-      }
-    }
-
-    setMinPrice(tempMinPrice);
-    setMaxPrice(tempMaxPrice);
-    setSelectedDesigners(tempSelectedDesigners);
-    setSelectedTops(tempSelectedTops);
-    setSelectedBottoms(tempSelectedBottoms);
-    setSelectedFootwears(tempSelectedFootwears);
-    if (tempIsNew !== initialIsNew) toggleIsNew();
-    setShowDropdown(null); 
-    onClose(); 
-  };
-
-  const handleClearFilters = () => {
-    setTempMinPrice('');
-    setTempMaxPrice('');
-    setTempSelectedDesigners([]);
-    setTempSelectedTops([]);
-    setTempSelectedBottoms([]);
-    setTempSelectedFootwears([]);
-    setTempIsNew(false);
-    clearFilters();
-    setShowDropdown(null); 
-  };
-
-  const handleCloseWithoutApplying = () => {
-    setTempMinPrice(initialMinPrice);
-    setTempMaxPrice(initialMaxPrice);
-    setTempSelectedDesigners(initialSelectedDesigners);
-    setTempSelectedTops(initialSelectedTops);
-    setTempSelectedBottoms(initialSelectedBottoms);
-    setTempSelectedFootwears(initialSelectedFootwears);
-    setTempIsNew(initialIsNew);
-
-    setShowDropdown(null); 
-    onClose();
-  };
-
   return (
-    <Modal visible={visible} transparent={true} animationType="slide" onRequestClose={handleCloseWithoutApplying}>
+    <Modal visible={visible} transparent={true} animationType="slide" onRequestClose={handleCloseModal}>
       <View style={styles.modalOverlay}>
         <View style={styles.filterPanel}>
           <View style={styles.header}>
-            <TouchableOpacity onPress={handleCloseWithoutApplying} style={styles.closeButton}>
+            <TouchableOpacity onPress={handleCloseModal} style={styles.closeButton}>
               <Text style={styles.closeButtonText}>✕</Text>
             </TouchableOpacity>
             <Text style={[styles.modalTitle, theme.title]}>Filters</Text>
@@ -182,22 +173,15 @@ export default function FilterModal({
             <Text style={styles.filterLabel}>What’s New</Text>
             <TouchableOpacity
               style={[styles.checkbox, tempIsNew && styles.checkedCheckbox]}
-              onPress={() => setTempIsNew(!tempIsNew)}
+              onPress={() => setTempIsNew((prev) => !prev)}
             >
               {tempIsNew && <Text style={styles.checkboxIcon}>✔</Text>}
             </TouchableOpacity>
           </View>
 
-          {renderDropdown(
-            "Designer",
-            designerNames.designers,
-            tempSelectedDesigners,
-            setTempSelectedDesigners,
-            "designer"
-          )}
-          {renderDropdown("Tops", ["Tops", "Sweaters & Knits"], tempSelectedTops, setTempSelectedTops, "tops")}
-          {renderDropdown("Bottoms", ["Jeans", "Skirt", "Pants", "Shorts"], tempSelectedBottoms, setTempSelectedBottoms, "bottoms")}
-          {renderDropdown("Footwear", footwearCategories, tempSelectedFootwears, setTempSelectedFootwears, "footwear")}
+          {renderDropdown('Tops', ['Tops', 'Sweaters & Knits'], tempSelectedTops, setTempSelectedTops, 'tops')}
+          {renderDropdown('Bottoms', ['Jeans', 'Skirts', 'Pants', 'Shorts'], tempSelectedBottoms, setTempSelectedBottoms, 'bottoms')}
+          {renderDropdown('Footwear', footwearCategories, tempSelectedFootwears, setTempSelectedFootwears, 'footwear')}
 
           <Text style={[styles.filterLabel, styles.priceTitle]}>Price</Text>
           <View style={styles.priceInputs}>
