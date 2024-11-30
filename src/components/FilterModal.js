@@ -7,9 +7,9 @@ import {
   TextInput,
   Modal,
   FlatList,
+  Alert,
 } from 'react-native';
 import { theme } from '../styles/Theme';
-import designerNames from '../constant/DesignerNames.json';
 
 export default function FilterModal({
   visible,
@@ -19,8 +19,6 @@ export default function FilterModal({
   setMinPrice,
   setMaxPrice,
   clearFilters,
-  selectedDesigners = [],
-  setSelectedDesigners,
   selectedTops = [],
   setSelectedTops,
   selectedBottoms = [],
@@ -28,11 +26,10 @@ export default function FilterModal({
   selectedFootwears = [],
   setSelectedFootwears,
   isNew,
-  toggleIsNew,
+  setIsNew
 }) {
   const [tempMinPrice, setTempMinPrice] = useState(minPrice);
   const [tempMaxPrice, setTempMaxPrice] = useState(maxPrice);
-  const [tempSelectedDesigners, setTempSelectedDesigners] = useState([...selectedDesigners]);
   const [tempSelectedTops, setTempSelectedTops] = useState([...selectedTops]);
   const [tempSelectedBottoms, setTempSelectedBottoms] = useState([...selectedBottoms]);
   const [tempSelectedFootwears, setTempSelectedFootwears] = useState([...selectedFootwears]);
@@ -53,7 +50,6 @@ export default function FilterModal({
     if (visible) {
       setTempMinPrice(minPrice);
       setTempMaxPrice(maxPrice);
-      setTempSelectedDesigners([...selectedDesigners]);
       setTempSelectedTops([...selectedTops]);
       setTempSelectedBottoms([...selectedBottoms]);
       setTempSelectedFootwears([...selectedFootwears]);
@@ -70,19 +66,50 @@ export default function FilterModal({
   };
 
   const handleApplyFilters = () => {
+    console.log("tempIsNew before applying filters:", tempIsNew);
+    if (tempMinPrice !== '' || tempMaxPrice !== '') {
+      const minPrice = parseFloat(tempMinPrice);
+      const maxPrice = parseFloat(tempMaxPrice);
+
+      if (!isNaN(minPrice) && minPrice < 0) {
+        Alert.alert("Invalid Minimum Price", "Minimum price must be greater than or equal to 0.");
+        return;
+      }
+
+      if (!isNaN(minPrice) && !isNaN(maxPrice) && maxPrice <= minPrice) {
+        Alert.alert(
+          "Invalid Maximum Price",
+          "Maximum price must be greater than the minimum price."
+        );
+        return;
+      }
+
+      if (isNaN(minPrice) || isNaN(maxPrice)) {
+        Alert.alert("Invalid Input", "Please enter valid numeric values for the prices.");
+        return;
+      }
+    }
+
     setMinPrice(tempMinPrice);
     setMaxPrice(tempMaxPrice);
-    setSelectedDesigners(tempSelectedDesigners);
     setSelectedTops(tempSelectedTops);
     setSelectedBottoms(tempSelectedBottoms);
     setSelectedFootwears(tempSelectedFootwears);
-    toggleIsNew(tempIsNew);
+
+    setIsNew(tempIsNew);
+
     setShowDropdown(null);
     onClose();
   };
 
   const handleClearFilters = () => {
-    clearFilters();
+    setTempMinPrice('');
+    setTempMaxPrice('');
+    setTempSelectedTops([]);
+    setTempSelectedBottoms([]);
+    setTempSelectedFootwears([]);
+    setTempIsNew(false);
+  
     setShowDropdown(null);
   };
 
@@ -152,7 +179,6 @@ export default function FilterModal({
             </TouchableOpacity>
           </View>
 
-          {renderDropdown('Designer', designerNames.designers, tempSelectedDesigners, setTempSelectedDesigners, 'designer')}
           {renderDropdown('Tops', ['Tops', 'Sweaters & Knits'], tempSelectedTops, setTempSelectedTops, 'tops')}
           {renderDropdown('Bottoms', ['Jeans', 'Skirts', 'Pants', 'Shorts'], tempSelectedBottoms, setTempSelectedBottoms, 'bottoms')}
           {renderDropdown('Footwear', footwearCategories, tempSelectedFootwears, setTempSelectedFootwears, 'footwear')}
