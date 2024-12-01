@@ -29,7 +29,6 @@ export default function SwipeScreen() {
 
   const [minPrice, setMinPrice] = useState('');
   const [maxPrice, setMaxPrice] = useState('');
-  const [selectedDesigners, setSelectedDesigners] = useState([]);
   const [selectedTops, setSelectedTops] = useState([]);
   const [selectedBottoms, setSelectedBottoms] = useState([]);
   const [selectedFootwears, setSelectedFootwears] = useState([]);
@@ -38,15 +37,10 @@ export default function SwipeScreen() {
   const clearFilters = () => {
     setMinPrice('');
     setMaxPrice('');
-    setSelectedDesigners([]);
     setSelectedTops([]);
     setSelectedBottoms([]);
     setSelectedFootwears([]);
     setIsNew(false);
-  };
-
-  const toggleIsNew = () => {
-    setIsNew((prev) => !prev);
   };
 
   // Category Mappings
@@ -136,7 +130,6 @@ export default function SwipeScreen() {
           categoryArray,
           minPrice: parsedMinPrice,
           maxPrice: parsedMaxPrice,
-          selectedDesigners,
         }),
       });
 
@@ -197,7 +190,7 @@ export default function SwipeScreen() {
       const nextProduct = await fetchRandomProduct(footwearCategories, minPrice, maxPrice);
       setNextShoesProduct(nextProduct);
     })();
-  }, [topsCategories, bottomsCategories, footwearCategories, minPrice, maxPrice, selectedDesigners]);
+  }, [topsCategories, bottomsCategories, footwearCategories, minPrice, maxPrice]);
 
   const refreshProduct = (boxNumber) => {
     if (boxNumber === 1) {
@@ -431,8 +424,6 @@ export default function SwipeScreen() {
         setMinPrice={setMinPrice}
         setMaxPrice={setMaxPrice}
         clearFilters={clearFilters}
-        selectedDesigners={selectedDesigners}
-        setSelectedDesigners={setSelectedDesigners}
         selectedTops={selectedTops}
         setSelectedTops={setSelectedTops}
         selectedBottoms={selectedBottoms}
@@ -440,7 +431,7 @@ export default function SwipeScreen() {
         selectedFootwears={selectedFootwears}
         setSelectedFootwears={setSelectedFootwears}
         isNew={isNew}
-        toggleIsNew={toggleIsNew}
+        setIsNew={setIsNew}
       />
       {popupVisible && (
         <Animated.View style={[styles.popup, { transform: [{ translateX: slideAnim }] }]}>
