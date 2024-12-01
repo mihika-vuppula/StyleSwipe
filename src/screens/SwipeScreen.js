@@ -1,4 +1,4 @@
-import React, { useState, useRef, useContext, useEffect } from 'react';
+import React, { useState, useRef, useContext, useEffect, useMemo } from 'react';
 import {
   View,
   Text,
@@ -25,10 +25,6 @@ export default function SwipeScreen() {
   const { userId } = useContext(UserContext);
 
   const [popupMessage, setPopupMessage] = useState('');
-
-  const [topsRefresh, setTopsRefresh] = useState(0);
-  const [bottomsRefresh, setBottomsRefresh] = useState(0);
-  const [shoesRefresh, setShoesRefresh] = useState(0);
 
   const slideAnim = useRef(new Animated.Value(Dimensions.get('window').width)).current;
 
@@ -91,55 +87,115 @@ export default function SwipeScreen() {
     setSelectedFootwears([]);
     setIsNew(false);
   };
-  
+
   const getMappedCategories = (selectedItems, categoryType) => {
     const mapping = isNew ? whatsNewMapping[categoryType] : categoryMapping[categoryType];
-    const mappedCategories = Array.isArray(selectedItems) && selectedItems.length > 0
-      ? selectedItems.map((item) => mapping[item])
-      : Object.values(mapping);
+    const mappedCategories =
+      Array.isArray(selectedItems) && selectedItems.length > 0
+        ? selectedItems.map((item) => mapping[item])
+        : Object.values(mapping);
     return mappedCategories;
   };
-  
-  const topsCategories = getMappedCategories(selectedTops, 'tops');
-  const bottomsCategories = getMappedCategories(selectedBottoms, 'bottoms');
-  const footwearCategories = getMappedCategories(selectedFootwears, 'footwear');
+
+  // Use useMemo to memoize the categories arrays
+  const topsCategories = useMemo(() => getMappedCategories(selectedTops, 'tops'), [selectedTops, isNew]);
+  const bottomsCategories = useMemo(() => getMappedCategories(selectedBottoms, 'bottoms'), [selectedBottoms, isNew]);
+  const footwearCategories = useMemo(() => getMappedCategories(selectedFootwears, 'footwear'), [selectedFootwears, isNew]);
+
+  // Pre-fetch the next products
+  const [nextTopsProduct, setNextTopsProduct] = useState(null);
+  const [nextBottomsProduct, setNextBottomsProduct] = useState(null);
+  const [nextShoesProduct, setNextShoesProduct] = useState(null);
+
+  // Fetch current products
+  const [topsRefresh, setTopsRefresh] = useState(0);
+  const [bottomsRefresh, setBottomsRefresh] = useState(0);
+  const [shoesRefresh, setShoesRefresh] = useState(0);
 
   const {
     product: topsProduct,
     loading: topsLoading,
     error: topsError,
   } = useFetchRandomProduct(topsCategories, topsRefresh, minPrice, maxPrice);
-  
+
   const {
     product: bottomsProduct,
     loading: bottomsLoading,
     error: bottomsError,
   } = useFetchRandomProduct(bottomsCategories, bottomsRefresh, minPrice, maxPrice);
-  
+
   const {
     product: shoesProduct,
     loading: shoesLoading,
     error: shoesError,
   } = useFetchRandomProduct(footwearCategories, shoesRefresh, minPrice, maxPrice);
-  
+
+  // Fetch next products when current ones change
+  useEffect(() => {
+    async function prefetchNextProduct(categoryArray, minPrice, maxPrice, setNextProduct) {
+      try {
+        const API_URL = "https://hzka2ob147.execute-api.us-east-1.amazonaws.com/dev/get_outfit_data";
+
+        const parsedMinPrice = minPrice ? parseFloat(minPrice) : 0;
+        const parsedMaxPrice = maxPrice ? parseFloat(maxPrice) : Number.MAX_SAFE_INTEGER;
+
+        const response = await fetch(API_URL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            categoryArray,
+            minPrice: parsedMinPrice,
+            maxPrice: parsedMaxPrice,
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        const product = {
+          itemId: data.productId,
+          imageUrl1: data.imageUrls[0],
+          imageUrl4: data.imageUrls[1],
+          productName: data.productName,
+          designerName: data.designerName,
+          productPrice: data.productPrice,
+          productUrl: data.productUrl,
+        };
+
+        setNextProduct(product);
+      } catch (err) {
+        console.error("Error prefetching product:", err);
+      }
+    }
+
+    // Pre-fetch next products
+    if (topsProduct) {
+      prefetchNextProduct(topsCategories, minPrice, maxPrice, setNextTopsProduct);
+    }
+    if (bottomsProduct) {
+      prefetchNextProduct(bottomsCategories, minPrice, maxPrice, setNextBottomsProduct);
+    }
+    if (shoesProduct) {
+      prefetchNextProduct(footwearCategories, minPrice, maxPrice, setNextShoesProduct);
+    }
+  }, [topsProduct, bottomsProduct, shoesProduct, topsCategories, bottomsCategories, footwearCategories, minPrice, maxPrice]);
 
   const refreshProduct = (boxNumber) => {
-    if (boxNumber === 1) setTopsRefresh((prev) => prev + 1);
-    if (boxNumber === 2) setBottomsRefresh((prev) => prev + 1);
-    if (boxNumber === 3) setShoesRefresh((prev) => prev + 1);
+    if (boxNumber === 1) {
+      setTopsRefresh((prev) => prev + 1);
+    }
+    if (boxNumber === 2) {
+      setBottomsRefresh((prev) => prev + 1);
+    }
+    if (boxNumber === 3) {
+      setShoesRefresh((prev) => prev + 1);
+    }
   };
-
-  useEffect(() => {
-    setTopsRefresh((prev) => prev + 1);
-  }, [selectedTops]);
-
-  useEffect(() => {
-    setBottomsRefresh((prev) => prev + 1);
-  }, [selectedBottoms]);
-
-  useEffect(() => {
-    setShoesRefresh((prev) => prev + 1);
-  }, [selectedFootwears]);
 
   const showPopup = (message) => {
     setPopupMessage(message);
@@ -157,7 +213,7 @@ export default function SwipeScreen() {
     }, 1000);
   };
 
-  const handleHeartPress = async (boxNumber) => {
+  const handleHeartPress = (boxNumber) => {
     let product;
     let itemType;
 
@@ -178,20 +234,26 @@ export default function SwipeScreen() {
       return;
     }
 
-    try {
-      console.log('Sending request to like item:', {
-        userId: userId,
-        itemId: product.itemId,
-        itemType: itemType,
-        imageUrl: product.imageUrl1,
-        productName: product.productName,
-        designerName: product.designerName,
-        productPrice: product.productPrice,
-        productUrl: product.productUrl
-      });
+    // Show success popup immediately
+    showPopup('YAY! Item Added To Your Fits');
 
-      // Call the like API
-      const response = await axios.post(
+    // Refresh the product using pre-fetched next product
+    if (boxNumber === 1 && nextTopsProduct) {
+      setNextTopsProduct(null);
+      setTopsRefresh((prev) => prev + 1);
+    } else if (boxNumber === 2 && nextBottomsProduct) {
+      setNextBottomsProduct(null);
+      setBottomsRefresh((prev) => prev + 1);
+    } else if (boxNumber === 3 && nextShoesProduct) {
+      setNextShoesProduct(null);
+      setShoesRefresh((prev) => prev + 1);
+    } else {
+      refreshProduct(boxNumber);
+    }
+
+    // Make the API call in the background
+    axios
+      .post(
         'https://2ox7hybif2.execute-api.us-east-1.amazonaws.com/dev/like-item',
         {
           userId: userId,
@@ -201,77 +263,89 @@ export default function SwipeScreen() {
           productName: product.productName,
           designerName: product.designerName,
           productPrice: product.productPrice,
-          productUrl: product.productUrl
+          productUrl: product.productUrl,
         },
         {
           headers: { 'Content-Type': 'application/json' },
         }
-      );
-
-      console.log('Like API Response:', response.data);
-      showPopup('YAY! Item Added To Your Fits');
-    } catch (error) {
-      console.error('Error liking item:', error.response || error.message);
-      showPopup('Error adding item to your fits');
-    }
-
-    // Refresh the product
-    refreshProduct(boxNumber);
+      )
+      .catch((error) => {
+        console.error('Error liking item:', error.response || error.message);
+      });
   };
 
-  const handleCreateOutfitPress = async () => {
+  const handleCreateOutfitPress = () => {
     if (!topsProduct || !bottomsProduct || !shoesProduct) {
       showPopup('Please make sure all items are loaded');
       return;
     }
-  
-    try {
-      const outfitData = {
-        userId: userId,
-        top: {
-          itemId: topsProduct.itemId,
-          itemType: 'top',
-          imageUrl: topsProduct.imageUrl1,
-          productName: topsProduct.productName,
-          designerName: topsProduct.designerName,
-          productPrice: topsProduct.productPrice,
-          productUrl: topsProduct.productUrl
-        },
-        bottom: {
-          itemId: bottomsProduct.itemId,
-          itemType: 'bottom',
-          imageUrl: bottomsProduct.imageUrl1,
-          productName: bottomsProduct.productName,
-          designerName: bottomsProduct.designerName,
-          productPrice: bottomsProduct.productPrice,
-          productUrl: bottomsProduct.productUrl
-        },
-        shoes: {
-          itemId: shoesProduct.itemId,
-          itemType: 'shoes',
-          imageUrl: shoesProduct.imageUrl1,
-          productName: shoesProduct.productName,
-          designerName: shoesProduct.designerName,
-          productPrice: shoesProduct.productPrice,
-          productUrl: shoesProduct.productUrl
 
-        },
-      };
+    // Show success popup immediately
+    showPopup('YAY! Outfit Added To Your Fits');
 
-      console.log('Sending request to create outfit:', outfitData);
+    // Refresh all products
+    if (nextTopsProduct) {
+      setNextTopsProduct(null);
+      setTopsRefresh((prev) => prev + 1);
+    } else {
+      refreshProduct(1);
+    }
 
-      const response = await axios.post(
+    if (nextBottomsProduct) {
+      setNextBottomsProduct(null);
+      setBottomsRefresh((prev) => prev + 1);
+    } else {
+      refreshProduct(2);
+    }
+
+    if (nextShoesProduct) {
+      setNextShoesProduct(null);
+      setShoesRefresh((prev) => prev + 1);
+    } else {
+      refreshProduct(3);
+    }
+
+    const outfitData = {
+      userId: userId,
+      top: {
+        itemId: topsProduct.itemId,
+        itemType: 'top',
+        imageUrl: topsProduct.imageUrl1,
+        productName: topsProduct.productName,
+        designerName: topsProduct.designerName,
+        productPrice: topsProduct.productPrice,
+        productUrl: topsProduct.productUrl,
+      },
+      bottom: {
+        itemId: bottomsProduct.itemId,
+        itemType: 'bottom',
+        imageUrl: bottomsProduct.imageUrl1,
+        productName: bottomsProduct.productName,
+        designerName: bottomsProduct.designerName,
+        productPrice: bottomsProduct.productPrice,
+        productUrl: bottomsProduct.productUrl,
+      },
+      shoes: {
+        itemId: shoesProduct.itemId,
+        itemType: 'shoes',
+        imageUrl: shoesProduct.imageUrl1,
+        productName: shoesProduct.productName,
+        designerName: shoesProduct.designerName,
+        productPrice: shoesProduct.productPrice,
+        productUrl: shoesProduct.productUrl,
+      },
+    };
+
+    // Make the API call in the background
+    axios
+      .post(
         'https://2ox7hybif2.execute-api.us-east-1.amazonaws.com/dev/create-fit',
         outfitData,
         { headers: { 'Content-Type': 'application/json' } }
-      );
-
-      console.log('Create Outfit API Response:', response.data);
-      showPopup('YAY! Outfit Added To Your Fits');
-    } catch (error) {
-      console.error('Error creating outfit:', error.response || error.message);
-      showPopup('Error adding outfit to your fits');
-    }
+      )
+      .catch((error) => {
+        console.error('Error creating outfit:', error.response || error.message);
+      });
   };
 
   const renderProductBox = (product, loading, error, boxNumber) => (
@@ -347,7 +421,6 @@ export default function SwipeScreen() {
     </SafeAreaView>
   );
 }
-
 
 const styles = StyleSheet.create({
   middleContent: {
