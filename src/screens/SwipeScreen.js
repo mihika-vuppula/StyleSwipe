@@ -45,6 +45,53 @@ export default function SwipeScreen() {
     setIsNew(false);
   };
 
+  const toggleIsNew = () => {
+    setIsNew((prev) => !prev);
+  };
+
+  // Category Mappings
+  const categoryMapping = {
+    tops: {
+      "Sweaters & Knits": 13317,
+      Tops: 13332,
+    },
+    bottoms: {
+      Jeans: 13377,
+      Pants: 13281,
+      Shorts: 13297,
+      Skirts: 13302,
+    },
+    footwear: {
+      Boots: 13460,
+      Flats: 13455,
+      Pumps: 13449,
+      "Rain & Winter Boots": 13490,
+      Sandals: 13441,
+      "Sneakers & Athletic": 13439,
+    },
+  };
+
+  const whatsNewMapping = {
+    tops: {
+      "Sweaters & Knits": 13244,
+      Tops: 13252,
+    },
+    bottoms: {
+      Jeans: 13255,
+      Pants: 13247,
+      Shorts: 13245,
+      Skirts: 13246,
+    },
+    footwear: {
+      Boots: 13205,
+      Flats: 13204,
+      Pumps: 13203,
+      "Rain Boots": 28966,
+      Sandals: 13202,
+      Sneakers: 13200,
+    },
+  };
+
   const getMappedCategories = (selectedItems, categoryType) => {
     const mapping = isNew ? whatsNewMapping[categoryType] : categoryMapping[categoryType];
     const mappedCategories =
@@ -54,7 +101,7 @@ export default function SwipeScreen() {
     return mappedCategories;
   };
 
-  // Use useMemo to memoize the categories arrays
+  // Use useMemo to memoize the category arrays
   const topsCategories = useMemo(() => getMappedCategories(selectedTops, 'tops'), [selectedTops, isNew]);
   const bottomsCategories = useMemo(() => getMappedCategories(selectedBottoms, 'bottoms'), [selectedBottoms, isNew]);
   const footwearCategories = useMemo(() => getMappedCategories(selectedFootwears, 'footwear'), [selectedFootwears, isNew]);
@@ -64,93 +111,139 @@ export default function SwipeScreen() {
   const [nextBottomsProduct, setNextBottomsProduct] = useState(null);
   const [nextShoesProduct, setNextShoesProduct] = useState(null);
 
-  // Fetch current products
-  const [topsRefresh, setTopsRefresh] = useState(0);
-  const [bottomsRefresh, setBottomsRefresh] = useState(0);
-  const [shoesRefresh, setShoesRefresh] = useState(0);
+  // Current products and their loading states
+  const [currentTopsProduct, setCurrentTopsProduct] = useState(null);
+  const [currentBottomsProduct, setCurrentBottomsProduct] = useState(null);
+  const [currentShoesProduct, setCurrentShoesProduct] = useState(null);
+  const [topsLoading, setTopsLoading] = useState(true);
+  const [bottomsLoading, setBottomsLoading] = useState(true);
+  const [shoesLoading, setShoesLoading] = useState(true);
 
-  const {
-    product: topsProduct,
-    loading: topsLoading,
-    error: topsError,
-  } = useFetchRandomProduct(topsCategories, topsRefresh, minPrice, maxPrice);
+  // Function to fetch a random product
+  const fetchRandomProduct = async (categoryArray, minPrice, maxPrice) => {
+    try {
+      const API_URL = "https://hzka2ob147.execute-api.us-east-1.amazonaws.com/dev/get_outfit_data";
 
-  const {
-    product: bottomsProduct,
-    loading: bottomsLoading,
-    error: bottomsError,
-  } = useFetchRandomProduct(bottomsCategories, bottomsRefresh, minPrice, maxPrice);
+      const parsedMinPrice = minPrice ? parseFloat(minPrice) : 0;
+      const parsedMaxPrice = maxPrice ? parseFloat(maxPrice) : Number.MAX_SAFE_INTEGER;
 
-  const {
-    product: shoesProduct,
-    loading: shoesLoading,
-    error: shoesError,
-  } = useFetchRandomProduct(footwearCategories, shoesRefresh, minPrice, maxPrice);
+      const response = await fetch(API_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          categoryArray,
+          minPrice: parsedMinPrice,
+          maxPrice: parsedMaxPrice,
+          selectedDesigners,
+        }),
+      });
 
-  // Fetch next products when current ones change
-  useEffect(() => {
-    async function prefetchNextProduct(categoryArray, minPrice, maxPrice, setNextProduct) {
-      try {
-        const API_URL = "https://hzka2ob147.execute-api.us-east-1.amazonaws.com/dev/get_outfit_data";
-
-        const parsedMinPrice = minPrice ? parseFloat(minPrice) : 0;
-        const parsedMaxPrice = maxPrice ? parseFloat(maxPrice) : Number.MAX_SAFE_INTEGER;
-
-        const response = await fetch(API_URL, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            categoryArray,
-            minPrice: parsedMinPrice,
-            maxPrice: parsedMaxPrice,
-          }),
-        });
-
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const data = await response.json();
-
-        const product = {
-          itemId: data.productId,
-          imageUrl1: data.imageUrls[0],
-          imageUrl4: data.imageUrls[1],
-          productName: data.productName,
-          designerName: data.designerName,
-          productPrice: data.productPrice,
-          productUrl: data.productUrl,
-        };
-
-        setNextProduct(product);
-      } catch (err) {
-        console.error("Error prefetching product:", err);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
-    }
 
-    // Pre-fetch next products
-    if (topsProduct) {
-      prefetchNextProduct(topsCategories, minPrice, maxPrice, setNextTopsProduct);
+      const data = await response.json();
+
+      const product = {
+        itemId: data.productId,
+        imageUrl1: data.imageUrls[0],
+        imageUrl4: data.imageUrls[1],
+        productName: data.productName,
+        designerName: data.designerName,
+        productPrice: data.productPrice,
+        productUrl: data.productUrl,
+      };
+
+      return product;
+    } catch (err) {
+      console.error("Error fetching product:", err);
+      return null;
     }
-    if (bottomsProduct) {
-      prefetchNextProduct(bottomsCategories, minPrice, maxPrice, setNextBottomsProduct);
-    }
-    if (shoesProduct) {
-      prefetchNextProduct(footwearCategories, minPrice, maxPrice, setNextShoesProduct);
-    }
-  }, [topsProduct, bottomsProduct, shoesProduct, topsCategories, bottomsCategories, footwearCategories, minPrice, maxPrice]);
+  };
+
+  // Initialize current and next products
+  useEffect(() => {
+    // Tops
+    (async () => {
+      setTopsLoading(true);
+      const product = await fetchRandomProduct(topsCategories, minPrice, maxPrice);
+      setCurrentTopsProduct(product);
+      setTopsLoading(false);
+
+      const nextProduct = await fetchRandomProduct(topsCategories, minPrice, maxPrice);
+      setNextTopsProduct(nextProduct);
+    })();
+
+    // Bottoms
+    (async () => {
+      setBottomsLoading(true);
+      const product = await fetchRandomProduct(bottomsCategories, minPrice, maxPrice);
+      setCurrentBottomsProduct(product);
+      setBottomsLoading(false);
+
+      const nextProduct = await fetchRandomProduct(bottomsCategories, minPrice, maxPrice);
+      setNextBottomsProduct(nextProduct);
+    })();
+
+    // Shoes
+    (async () => {
+      setShoesLoading(true);
+      const product = await fetchRandomProduct(footwearCategories, minPrice, maxPrice);
+      setCurrentShoesProduct(product);
+      setShoesLoading(false);
+
+      const nextProduct = await fetchRandomProduct(footwearCategories, minPrice, maxPrice);
+      setNextShoesProduct(nextProduct);
+    })();
+  }, [topsCategories, bottomsCategories, footwearCategories, minPrice, maxPrice, selectedDesigners]);
 
   const refreshProduct = (boxNumber) => {
     if (boxNumber === 1) {
-      setTopsRefresh((prev) => prev + 1);
+      if (nextTopsProduct) {
+        setCurrentTopsProduct(nextTopsProduct);
+        setNextTopsProduct(null);
+        fetchRandomProduct(topsCategories, minPrice, maxPrice).then((product) => {
+          setNextTopsProduct(product);
+        });
+      } else {
+        setTopsLoading(true);
+        fetchRandomProduct(topsCategories, minPrice, maxPrice).then((product) => {
+          setCurrentTopsProduct(product);
+          setTopsLoading(false);
+        });
+      }
     }
     if (boxNumber === 2) {
-      setBottomsRefresh((prev) => prev + 1);
+      if (nextBottomsProduct) {
+        setCurrentBottomsProduct(nextBottomsProduct);
+        setNextBottomsProduct(null);
+        fetchRandomProduct(bottomsCategories, minPrice, maxPrice).then((product) => {
+          setNextBottomsProduct(product);
+        });
+      } else {
+        setBottomsLoading(true);
+        fetchRandomProduct(bottomsCategories, minPrice, maxPrice).then((product) => {
+          setCurrentBottomsProduct(product);
+          setBottomsLoading(false);
+        });
+      }
     }
     if (boxNumber === 3) {
-      setShoesRefresh((prev) => prev + 1);
+      if (nextShoesProduct) {
+        setCurrentShoesProduct(nextShoesProduct);
+        setNextShoesProduct(null);
+        fetchRandomProduct(footwearCategories, minPrice, maxPrice).then((product) => {
+          setNextShoesProduct(product);
+        });
+      } else {
+        setShoesLoading(true);
+        fetchRandomProduct(footwearCategories, minPrice, maxPrice).then((product) => {
+          setCurrentShoesProduct(product);
+          setShoesLoading(false);
+        });
+      }
     }
   };
 
@@ -194,19 +287,8 @@ export default function SwipeScreen() {
     // Show success popup immediately
     showPopup('YAY! Item Added To Your Fits');
 
-    // Refresh the product using pre-fetched next product
-    if (boxNumber === 1 && nextTopsProduct) {
-      setNextTopsProduct(null);
-      setTopsRefresh((prev) => prev + 1);
-    } else if (boxNumber === 2 && nextBottomsProduct) {
-      setNextBottomsProduct(null);
-      setBottomsRefresh((prev) => prev + 1);
-    } else if (boxNumber === 3 && nextShoesProduct) {
-      setNextShoesProduct(null);
-      setShoesRefresh((prev) => prev + 1);
-    } else {
-      refreshProduct(boxNumber);
-    }
+    // Refresh the product
+    refreshProduct(boxNumber);
 
     // Make the API call in the background
     axios
@@ -232,7 +314,7 @@ export default function SwipeScreen() {
   };
 
   const handleCreateOutfitPress = () => {
-    if (!topsProduct || !bottomsProduct || !shoesProduct) {
+    if (!currentTopsProduct || !currentBottomsProduct || !currentShoesProduct) {
       showPopup('Please make sure all items are loaded');
       return;
     }
@@ -241,55 +323,38 @@ export default function SwipeScreen() {
     showPopup('YAY! Outfit Added To Your Fits');
 
     // Refresh all products
-    if (nextTopsProduct) {
-      setNextTopsProduct(null);
-      setTopsRefresh((prev) => prev + 1);
-    } else {
-      refreshProduct(1);
-    }
-
-    if (nextBottomsProduct) {
-      setNextBottomsProduct(null);
-      setBottomsRefresh((prev) => prev + 1);
-    } else {
-      refreshProduct(2);
-    }
-
-    if (nextShoesProduct) {
-      setNextShoesProduct(null);
-      setShoesRefresh((prev) => prev + 1);
-    } else {
-      refreshProduct(3);
-    }
+    refreshProduct(1);
+    refreshProduct(2);
+    refreshProduct(3);
 
     const outfitData = {
       userId: userId,
       top: {
-        itemId: topsProduct.itemId,
+        itemId: currentTopsProduct.itemId,
         itemType: 'top',
-        imageUrl: topsProduct.imageUrl1,
-        productName: topsProduct.productName,
-        designerName: topsProduct.designerName,
-        productPrice: topsProduct.productPrice,
-        productUrl: topsProduct.productUrl,
+        imageUrl: currentTopsProduct.imageUrl1,
+        productName: currentTopsProduct.productName,
+        designerName: currentTopsProduct.designerName,
+        productPrice: currentTopsProduct.productPrice,
+        productUrl: currentTopsProduct.productUrl,
       },
       bottom: {
-        itemId: bottomsProduct.itemId,
+        itemId: currentBottomsProduct.itemId,
         itemType: 'bottom',
-        imageUrl: bottomsProduct.imageUrl1,
-        productName: bottomsProduct.productName,
-        designerName: bottomsProduct.designerName,
-        productPrice: bottomsProduct.productPrice,
-        productUrl: bottomsProduct.productUrl,
+        imageUrl: currentBottomsProduct.imageUrl1,
+        productName: currentBottomsProduct.productName,
+        designerName: currentBottomsProduct.designerName,
+        productPrice: currentBottomsProduct.productPrice,
+        productUrl: currentBottomsProduct.productUrl,
       },
       shoes: {
-        itemId: shoesProduct.itemId,
+        itemId: currentShoesProduct.itemId,
         itemType: 'shoes',
-        imageUrl: shoesProduct.imageUrl1,
-        productName: shoesProduct.productName,
-        designerName: shoesProduct.designerName,
-        productPrice: shoesProduct.productPrice,
-        productUrl: shoesProduct.productUrl,
+        imageUrl: currentShoesProduct.imageUrl1,
+        productName: currentShoesProduct.productName,
+        designerName: currentShoesProduct.designerName,
+        productPrice: currentShoesProduct.productPrice,
+        productUrl: currentShoesProduct.productUrl,
       },
     };
 
