@@ -13,7 +13,6 @@ import {
 import { MaterialIcons } from '@expo/vector-icons';
 import FilterModal from '../components/FilterModal';
 import { theme } from '../styles/Theme';
-import { useFetchRandomProduct } from '../hooks/useFetchProduct';
 import axios from 'axios';
 import { UserContext } from '../context/UserContext';
 
@@ -21,59 +20,16 @@ const { height } = Dimensions.get('window');
 
 export default function SwipeScreen() {
   const [popupVisible, setPopupVisible] = useState(false);
-
   const { userId } = useContext(UserContext);
-
   const [popupMessage, setPopupMessage] = useState('');
 
   const slideAnim = useRef(new Animated.Value(Dimensions.get('window').width)).current;
-
-  const categoryMapping = {
-    tops: {
-      "Sweaters & Knits": 13317,
-      Tops: 13332,
-    },
-    bottoms: {
-      Jeans: 13377,
-      Pants: 13281,
-      Shorts: 13297,
-      Skirts: 13302,
-    },
-    footwear: {
-      Boots: 13460,
-      Flats: 13455,
-      Pumps: 13449,
-      "Rain & Winter Boots": 13490,
-      Sandals: 13441,
-      "Sneakers & Athletic": 13439,
-    },
-  };
-
-  const whatsNewMapping = {
-    tops: {
-      "Sweaters & Knits": 13244,
-      Tops: 13252,
-    },
-    bottoms: {
-      Jeans: 13255,
-      Pants: 13247,
-      Shorts: 13245,
-      Skirts: 13246,
-    },
-    footwear: {
-      Boots: 13205,
-      Flats: 13204,
-      Pumps: 13203,
-      "Rain Boots": 28966,
-      Sandals: 13202,
-      Sneakers: 13200,
-    },
-  };
 
   const [filterVisible, setFilterVisible] = useState(false);
 
   const [minPrice, setMinPrice] = useState('');
   const [maxPrice, setMaxPrice] = useState('');
+  const [selectedDesigners, setSelectedDesigners] = useState([]);
   const [selectedTops, setSelectedTops] = useState([]);
   const [selectedBottoms, setSelectedBottoms] = useState([]);
   const [selectedFootwears, setSelectedFootwears] = useState([]);
@@ -82,6 +38,7 @@ export default function SwipeScreen() {
   const clearFilters = () => {
     setMinPrice('');
     setMaxPrice('');
+    setSelectedDesigners([]);
     setSelectedTops([]);
     setSelectedBottoms([]);
     setSelectedFootwears([]);
@@ -218,13 +175,13 @@ export default function SwipeScreen() {
     let itemType;
 
     if (boxNumber === 1) {
-      product = topsProduct;
+      product = currentTopsProduct;
       itemType = 'top';
     } else if (boxNumber === 2) {
-      product = bottomsProduct;
+      product = currentBottomsProduct;
       itemType = 'bottom';
     } else if (boxNumber === 3) {
-      product = shoesProduct;
+      product = currentShoesProduct;
       itemType = 'shoes';
     }
 
@@ -348,7 +305,7 @@ export default function SwipeScreen() {
       });
   };
 
-  const renderProductBox = (product, loading, error, boxNumber) => (
+  const renderProductBox = (product, loading, boxNumber) => (
     <View style={styles.boxContainer}>
       <TouchableOpacity style={styles.iconButton} onPress={() => refreshProduct(boxNumber)}>
         <MaterialIcons name="close" size={24} color={theme.primaryColor} />
@@ -356,12 +313,18 @@ export default function SwipeScreen() {
       <View style={styles.box}>
         {loading ? (
           <ActivityIndicator size="large" color={theme.primaryColor} />
-        ) : error ? (
-          <Text>Error loading product</Text>
         ) : (
           product && (
             <View style={styles.productContainer}>
-              <Image source={{ uri: product.imageUrl1 }} style={styles.productImage} />
+              <Image
+                source={{ uri: product.imageUrl1 }}
+                style={[
+                  styles.productImage,
+                  boxNumber === 1 && styles.topImage,
+                  boxNumber === 2 && styles.bottomImage,
+                  boxNumber === 3 && styles.shoeImage,
+                ]}
+              />
               <View style={styles.overlay}>
                 <View style={styles.row}>
                   <Text style={styles.designerName}>{product.designerName}</Text>
@@ -388,9 +351,9 @@ export default function SwipeScreen() {
         </TouchableOpacity>
       </View>
       <View style={styles.middleContent}>
-        {renderProductBox(topsProduct, topsLoading, topsError, 1)}
-        {renderProductBox(bottomsProduct, bottomsLoading, bottomsError, 2)}
-        {renderProductBox(shoesProduct, shoesLoading, shoesError, 3)}
+        {renderProductBox(currentTopsProduct, topsLoading, 1)}
+        {renderProductBox(currentBottomsProduct, bottomsLoading, 2)}
+        {renderProductBox(currentShoesProduct, shoesLoading, 3)}
       </View>
       <TouchableOpacity style={styles.button} onPress={handleCreateOutfitPress}>
         <Text style={styles.buttonText}>Create Outfit</Text>
@@ -403,6 +366,8 @@ export default function SwipeScreen() {
         setMinPrice={setMinPrice}
         setMaxPrice={setMaxPrice}
         clearFilters={clearFilters}
+        selectedDesigners={selectedDesigners}
+        setSelectedDesigners={setSelectedDesigners}
         selectedTops={selectedTops}
         setSelectedTops={setSelectedTops}
         selectedBottoms={selectedBottoms}
@@ -410,7 +375,7 @@ export default function SwipeScreen() {
         selectedFootwears={selectedFootwears}
         setSelectedFootwears={setSelectedFootwears}
         isNew={isNew}
-        setIsNew={setIsNew}
+        toggleIsNew={toggleIsNew}
       />
       {popupVisible && (
         <Animated.View style={[styles.popup, { transform: [{ translateX: slideAnim }] }]}>

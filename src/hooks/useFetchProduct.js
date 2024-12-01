@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 
-export function useFetchRandomProduct(categoryArray, refreshTrigger, minPrice = null, maxPrice = null) {
+export function useFetchRandomProduct(categoryArray, refreshTrigger) {
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -11,19 +11,14 @@ export function useFetchRandomProduct(categoryArray, refreshTrigger, minPrice = 
         setLoading(true);
 
         const API_URL = "https://hzka2ob147.execute-api.us-east-1.amazonaws.com/dev/get_outfit_data";
-
-        const parsedMinPrice = minPrice ? parseFloat(minPrice) : 0;
-        const parsedMaxPrice = maxPrice ? parseFloat(maxPrice) : Number.MAX_SAFE_INTEGER;
-
+        
         const response = await fetch(API_URL, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            categoryArray,
-            minPrice: parsedMinPrice,
-            maxPrice: parsedMaxPrice,
+            categoryArray: categoryArray, 
           }),
         });
 
@@ -34,15 +29,16 @@ export function useFetchRandomProduct(categoryArray, refreshTrigger, minPrice = 
         const data = await response.json();
 
         setProduct({
-          itemId: data.productId,
-          imageUrl1: data.imageUrls[0],
-          imageUrl4: data.imageUrls[1],
+          itemId: data.productId, 
+          imageUrl1: data.imageUrls[0], 
+          imageUrl4: data.imageUrls[1], 
           productName: data.productName,
           designerName: data.designerName,
           productPrice: data.productPrice,
-          productUrl: data.productUrl,
+          productUrl: data.productUrl
         });
       } catch (err) {
+        console.error("Error fetching product:", err);
         setError(err.message);
       } finally {
         setLoading(false);
@@ -50,7 +46,7 @@ export function useFetchRandomProduct(categoryArray, refreshTrigger, minPrice = 
     }
 
     fetchProduct();
-  }, [refreshTrigger, minPrice, maxPrice]);
+  }, [refreshTrigger]);
 
   return { product, loading, error };
 }

@@ -208,7 +208,6 @@ export default function MatchScreen({ navigation }) {
       console.error('Product is missing or invalid:', product);
       return;
     }
-
     try {
       // Send a POST request to the /trending endpoint to like the item
       const response = await axios.post(
