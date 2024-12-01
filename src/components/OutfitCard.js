@@ -38,7 +38,6 @@ export default function OutfitCard({ outfit, cardWidth, onRemove }) {
 
   const shareLinks = async () => {
     const links = [
-      // Collect the available links
       top.productUrl ? `Top: ${top.productUrl}` : null,
       bottom.productUrl ? `Bottom: ${bottom.productUrl}` : null,
       shoes.productUrl ? `Shoes: ${shoes.productUrl}` : null,
@@ -93,9 +92,11 @@ export default function OutfitCard({ outfit, cardWidth, onRemove }) {
             <TouchableOpacity style={theme.iconButton} onPress={shareLinks}>
               <MaterialCommunityIcons name="share-outline" size={20} color="#333" />
             </TouchableOpacity>
-            <TouchableOpacity style={theme.iconButton} onPress={onRemove}>
-              <MaterialCommunityIcons name="trash-can-outline" size={20} color="#333" />
-            </TouchableOpacity>
+            {onRemove && (
+              <TouchableOpacity style={theme.iconButton} onPress={onRemove}>
+                <MaterialCommunityIcons name="trash-can-outline" size={20} color="#333" />
+              </TouchableOpacity>
+            )}
           </View>
         </View>
       </View>

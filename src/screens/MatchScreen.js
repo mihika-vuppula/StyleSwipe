@@ -208,7 +208,6 @@ export default function MatchScreen({ navigation }) {
       console.error('Product is missing or invalid:', product);
       return;
     }
-  
     try {
       // Send a POST request to the /trending endpoint to like the item
       const response = await axios.post(
@@ -217,22 +216,21 @@ export default function MatchScreen({ navigation }) {
           action: 'like',
           userId: userId,
           itemId: product.itemId,
-          itemType: 'item', // Include itemType
+          itemType: 'item', // Ensure itemType is included
           imageUrl: product.imageUrl,
           productName: product.productName,
           designerName: product.designerName,
           productPrice: product.productPrice,
-          productUrl: product.productUrl,
+          productUrl: product.productUrl, // Ensure productUrl is included
         },
         {
           headers: { 'Content-Type': 'application/json' },
         }
       );
-  
+
       console.log('Like API Response:', response.data);
       // Show success popup
       showPopup('Item added to Your Fits!');
-  
     } catch (error) {
       console.error('Error liking item:', error.response || error.message);
       // Show error popup

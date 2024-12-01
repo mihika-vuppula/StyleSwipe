@@ -1,4 +1,4 @@
-import React, { useState, useRef, useContext, useEffect } from 'react';
+import React, { useState, useRef, useContext, useEffect, useMemo } from 'react';
 import {
   View,
   Text,
@@ -23,19 +23,6 @@ export default function SwipeScreen() {
   const { userId } = useContext(UserContext);
   const [popupMessage, setPopupMessage] = useState('');
 
-  // State for current and next products
-  const [currentTopsProduct, setCurrentTopsProduct] = useState(null);
-  const [nextTopsProduct, setNextTopsProduct] = useState(null);
-  const [currentBottomsProduct, setCurrentBottomsProduct] = useState(null);
-  const [nextBottomsProduct, setNextBottomsProduct] = useState(null);
-  const [currentShoesProduct, setCurrentShoesProduct] = useState(null);
-  const [nextShoesProduct, setNextShoesProduct] = useState(null);
-
-  // Loading states
-  const [topsLoading, setTopsLoading] = useState(true);
-  const [bottomsLoading, setBottomsLoading] = useState(true);
-  const [shoesLoading, setShoesLoading] = useState(true);
-
   const slideAnim = useRef(new Animated.Value(Dimensions.get('window').width)).current;
 
   const [filterVisible, setFilterVisible] = useState(false);
@@ -58,78 +45,112 @@ export default function SwipeScreen() {
     setIsNew(false);
   };
 
-  const toggleIsNew = () => {
-    setIsNew((prev) => !prev);
+  const getMappedCategories = (selectedItems, categoryType) => {
+    const mapping = isNew ? whatsNewMapping[categoryType] : categoryMapping[categoryType];
+    const mappedCategories =
+      Array.isArray(selectedItems) && selectedItems.length > 0
+        ? selectedItems.map((item) => mapping[item])
+        : Object.values(mapping);
+    return mappedCategories;
   };
 
-  // Fetch product function
-  const fetchProduct = async (categoryArray, setProductState, setLoadingState = null) => {
-    if (setLoadingState) {
-      setLoadingState(true);
-    }
-    try {
-      const API_URL =
-        'https://hzka2ob147.execute-api.us-east-1.amazonaws.com/dev/get_outfit_data';
-      const response = await fetch(API_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ categoryArray: categoryArray }),
-      });
+  // Use useMemo to memoize the categories arrays
+  const topsCategories = useMemo(() => getMappedCategories(selectedTops, 'tops'), [selectedTops, isNew]);
+  const bottomsCategories = useMemo(() => getMappedCategories(selectedBottoms, 'bottoms'), [selectedBottoms, isNew]);
+  const footwearCategories = useMemo(() => getMappedCategories(selectedFootwears, 'footwear'), [selectedFootwears, isNew]);
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      const data = await response.json();
-      const productData = {
-        itemId: data.productId,
-        imageUrl1: data.imageUrls[0],
-        imageUrl4: data.imageUrls[1],
-        productName: data.productName,
-        designerName: data.designerName,
-        productPrice: data.productPrice,
-        productUrl: data.productUrl,
-      };
-      setProductState(productData);
-    } catch (err) {
-      console.error('Error fetching product:', err);
-      // Optionally, set error state
-    } finally {
-      if (setLoadingState) {
-        setLoadingState(false);
-      }
-    }
-  };
+  // Pre-fetch the next products
+  const [nextTopsProduct, setNextTopsProduct] = useState(null);
+  const [nextBottomsProduct, setNextBottomsProduct] = useState(null);
+  const [nextShoesProduct, setNextShoesProduct] = useState(null);
 
-  // Initial fetch for current and next products
+  // Fetch current products
+  const [topsRefresh, setTopsRefresh] = useState(0);
+  const [bottomsRefresh, setBottomsRefresh] = useState(0);
+  const [shoesRefresh, setShoesRefresh] = useState(0);
+
+  const {
+    product: topsProduct,
+    loading: topsLoading,
+    error: topsError,
+  } = useFetchRandomProduct(topsCategories, topsRefresh, minPrice, maxPrice);
+
+  const {
+    product: bottomsProduct,
+    loading: bottomsLoading,
+    error: bottomsError,
+  } = useFetchRandomProduct(bottomsCategories, bottomsRefresh, minPrice, maxPrice);
+
+  const {
+    product: shoesProduct,
+    loading: shoesLoading,
+    error: shoesError,
+  } = useFetchRandomProduct(footwearCategories, shoesRefresh, minPrice, maxPrice);
+
+  // Fetch next products when current ones change
   useEffect(() => {
-    // Tops
-    fetchProduct([13317, 13332], setCurrentTopsProduct, setTopsLoading).then(() => {
-      fetchProduct([13317, 13332], setNextTopsProduct);
-    });
-    // Bottoms
-    fetchProduct([13281, 13297, 13302, 13377], setCurrentBottomsProduct, setBottomsLoading).then(
-      () => {
-        fetchProduct([13281, 13297, 13302, 13377], setNextBottomsProduct);
+    async function prefetchNextProduct(categoryArray, minPrice, maxPrice, setNextProduct) {
+      try {
+        const API_URL = "https://hzka2ob147.execute-api.us-east-1.amazonaws.com/dev/get_outfit_data";
+
+        const parsedMinPrice = minPrice ? parseFloat(minPrice) : 0;
+        const parsedMaxPrice = maxPrice ? parseFloat(maxPrice) : Number.MAX_SAFE_INTEGER;
+
+        const response = await fetch(API_URL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            categoryArray,
+            minPrice: parsedMinPrice,
+            maxPrice: parsedMaxPrice,
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        const product = {
+          itemId: data.productId,
+          imageUrl1: data.imageUrls[0],
+          imageUrl4: data.imageUrls[1],
+          productName: data.productName,
+          designerName: data.designerName,
+          productPrice: data.productPrice,
+          productUrl: data.productUrl,
+        };
+
+        setNextProduct(product);
+      } catch (err) {
+        console.error("Error prefetching product:", err);
       }
-    );
-    // Shoes
-    fetchProduct([13438], setCurrentShoesProduct, setShoesLoading).then(() => {
-      fetchProduct([13438], setNextShoesProduct);
-    });
-  }, []);
+    }
+
+    // Pre-fetch next products
+    if (topsProduct) {
+      prefetchNextProduct(topsCategories, minPrice, maxPrice, setNextTopsProduct);
+    }
+    if (bottomsProduct) {
+      prefetchNextProduct(bottomsCategories, minPrice, maxPrice, setNextBottomsProduct);
+    }
+    if (shoesProduct) {
+      prefetchNextProduct(footwearCategories, minPrice, maxPrice, setNextShoesProduct);
+    }
+  }, [topsProduct, bottomsProduct, shoesProduct, topsCategories, bottomsCategories, footwearCategories, minPrice, maxPrice]);
 
   const refreshProduct = (boxNumber) => {
     if (boxNumber === 1) {
-      setCurrentTopsProduct(nextTopsProduct);
-      fetchProduct([13317, 13332], setNextTopsProduct);
+      setTopsRefresh((prev) => prev + 1);
     }
     if (boxNumber === 2) {
-      setCurrentBottomsProduct(nextBottomsProduct);
-      fetchProduct([13281, 13297, 13302, 13377], setNextBottomsProduct);
+      setBottomsRefresh((prev) => prev + 1);
     }
     if (boxNumber === 3) {
-      setCurrentShoesProduct(nextShoesProduct);
-      fetchProduct([13438], setNextShoesProduct);
+      setShoesRefresh((prev) => prev + 1);
     }
   };
 
@@ -173,8 +194,19 @@ export default function SwipeScreen() {
     // Show success popup immediately
     showPopup('YAY! Item Added To Your Fits');
 
-    // Refresh the product
-    refreshProduct(boxNumber);
+    // Refresh the product using pre-fetched next product
+    if (boxNumber === 1 && nextTopsProduct) {
+      setNextTopsProduct(null);
+      setTopsRefresh((prev) => prev + 1);
+    } else if (boxNumber === 2 && nextBottomsProduct) {
+      setNextBottomsProduct(null);
+      setBottomsRefresh((prev) => prev + 1);
+    } else if (boxNumber === 3 && nextShoesProduct) {
+      setNextShoesProduct(null);
+      setShoesRefresh((prev) => prev + 1);
+    } else {
+      refreshProduct(boxNumber);
+    }
 
     // Make the API call in the background
     axios
@@ -194,17 +226,13 @@ export default function SwipeScreen() {
           headers: { 'Content-Type': 'application/json' },
         }
       )
-      .then((response) => {
-        // Optionally handle success
-      })
       .catch((error) => {
         console.error('Error liking item:', error.response || error.message);
-        // Optionally show an error popup
       });
   };
 
   const handleCreateOutfitPress = () => {
-    if (!currentTopsProduct || !currentBottomsProduct || !currentShoesProduct) {
+    if (!topsProduct || !bottomsProduct || !shoesProduct) {
       showPopup('Please make sure all items are loaded');
       return;
     }
@@ -213,39 +241,55 @@ export default function SwipeScreen() {
     showPopup('YAY! Outfit Added To Your Fits');
 
     // Refresh all products
-    refreshProduct(1);
-    refreshProduct(2);
-    refreshProduct(3);
+    if (nextTopsProduct) {
+      setNextTopsProduct(null);
+      setTopsRefresh((prev) => prev + 1);
+    } else {
+      refreshProduct(1);
+    }
 
-    // Prepare the outfit data
+    if (nextBottomsProduct) {
+      setNextBottomsProduct(null);
+      setBottomsRefresh((prev) => prev + 1);
+    } else {
+      refreshProduct(2);
+    }
+
+    if (nextShoesProduct) {
+      setNextShoesProduct(null);
+      setShoesRefresh((prev) => prev + 1);
+    } else {
+      refreshProduct(3);
+    }
+
     const outfitData = {
       userId: userId,
       top: {
-        itemId: currentTopsProduct.itemId,
+        itemId: topsProduct.itemId,
         itemType: 'top',
-        imageUrl: currentTopsProduct.imageUrl1,
-        productName: currentTopsProduct.productName,
-        designerName: currentTopsProduct.designerName,
-        productPrice: currentTopsProduct.productPrice,
-        productUrl: currentTopsProduct.productUrl,
+        imageUrl: topsProduct.imageUrl1,
+        productName: topsProduct.productName,
+        designerName: topsProduct.designerName,
+        productPrice: topsProduct.productPrice,
+        productUrl: topsProduct.productUrl,
       },
       bottom: {
-        itemId: currentBottomsProduct.itemId,
+        itemId: bottomsProduct.itemId,
         itemType: 'bottom',
-        imageUrl: currentBottomsProduct.imageUrl1,
-        productName: currentBottomsProduct.productName,
-        designerName: currentBottomsProduct.designerName,
-        productPrice: currentBottomsProduct.productPrice,
-        productUrl: currentBottomsProduct.productUrl,
+        imageUrl: bottomsProduct.imageUrl1,
+        productName: bottomsProduct.productName,
+        designerName: bottomsProduct.designerName,
+        productPrice: bottomsProduct.productPrice,
+        productUrl: bottomsProduct.productUrl,
       },
       shoes: {
-        itemId: currentShoesProduct.itemId,
+        itemId: shoesProduct.itemId,
         itemType: 'shoes',
-        imageUrl: currentShoesProduct.imageUrl1,
-        productName: currentShoesProduct.productName,
-        designerName: currentShoesProduct.designerName,
-        productPrice: currentShoesProduct.productPrice,
-        productUrl: currentShoesProduct.productUrl,
+        imageUrl: shoesProduct.imageUrl1,
+        productName: shoesProduct.productName,
+        designerName: shoesProduct.designerName,
+        productPrice: shoesProduct.productPrice,
+        productUrl: shoesProduct.productUrl,
       },
     };
 
@@ -253,17 +297,11 @@ export default function SwipeScreen() {
     axios
       .post(
         'https://2ox7hybif2.execute-api.us-east-1.amazonaws.com/dev/create-fit',
-        JSON.stringify(outfitData),
-        {
-          headers: { 'Content-Type': 'application/json' },
-        }
+        outfitData,
+        { headers: { 'Content-Type': 'application/json' } }
       )
-      .then((response) => {
-        // Optionally handle success
-      })
       .catch((error) => {
         console.error('Error creating outfit:', error.response || error.message);
-        // Optionally show an error popup
       });
   };
 
