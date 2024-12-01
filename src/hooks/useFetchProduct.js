@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 
-export function useFetchRandomProduct(categoryArray, refreshTrigger) {
+export function useFetchRandomProduct(categoryArray, refreshTrigger, minPrice = null, maxPrice = null) {
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -11,14 +11,17 @@ export function useFetchRandomProduct(categoryArray, refreshTrigger) {
         setLoading(true);
 
         const API_URL = "https://hzka2ob147.execute-api.us-east-1.amazonaws.com/dev/get_outfit_data";
-        
+        const parsedMinPrice = minPrice ? parseFloat(minPrice) : 0;
+        const parsedMaxPrice = maxPrice ? parseFloat(maxPrice) : Number.MAX_SAFE_INTEGER;
         const response = await fetch(API_URL, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            categoryArray: categoryArray, 
+            categoryArray,
+            minPrice: parsedMinPrice,
+            maxPrice: parsedMaxPrice,
           }),
         });
 
@@ -35,10 +38,9 @@ export function useFetchRandomProduct(categoryArray, refreshTrigger) {
           productName: data.productName,
           designerName: data.designerName,
           productPrice: data.productPrice,
-          productUrl: data.productUrl
+          productUrl: data.productUrl,
         });
       } catch (err) {
-        console.error("Error fetching product:", err);
         setError(err.message);
       } finally {
         setLoading(false);
@@ -46,7 +48,7 @@ export function useFetchRandomProduct(categoryArray, refreshTrigger) {
     }
 
     fetchProduct();
-  }, [refreshTrigger]);
+  }, [refreshTrigger, minPrice, maxPrice]);
 
   return { product, loading, error };
 }
