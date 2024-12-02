@@ -41,7 +41,7 @@ export default function OutfitCard({ outfit, cardWidth, onRemove }) {
       top.productUrl ? `Top: ${top.productUrl}` : null,
       bottom.productUrl ? `Bottom: ${bottom.productUrl}` : null,
       shoes.productUrl ? `Shoes: ${shoes.productUrl}` : null,
-    ].filter(Boolean); // Filter out null/undefined links
+    ].filter(Boolean); 
 
     // Combine the links into a single message
     const linksMessage = links.join('\n');

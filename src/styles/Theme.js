@@ -32,11 +32,11 @@ export const theme = {
     },
     buttonsContainer: {
         flexDirection: 'row',
-        justifyContent: 'space-between', // Adjusted to space buttons appropriately
-        alignItems: 'center',            // Align items vertically centered
+        justifyContent: 'space-between', 
+        alignItems: 'center',            
         paddingVertical: 10,
         width: '100%',
-        marginTop: 8,                    // Added marginTop for spacing
+        marginTop: 8,                   
     },
     detailsButton: {
         borderWidth: 1,
@@ -46,14 +46,14 @@ export const theme = {
         borderRadius: 20,
         alignItems: 'center',
         flex: 1,
-        marginRight: 8,                  // Adjusted marginRight for consistent spacing
+        marginRight: 8,           
     },
     detailsButtonText: {
         fontSize: 12,
         fontWeight: 'bold',
     },
     iconButton: {
-        marginLeft: 8,                   // Space between icons
+        marginLeft: 8,          
         padding: 4,
         borderWidth: 1,
         borderColor: secondaryColor,
@@ -61,5 +61,4 @@ export const theme = {
         alignItems: 'center',
         justifyContent: 'center',
     },
-    // Removed 'shareButton' since 'iconButton' can be used for both icons
 };

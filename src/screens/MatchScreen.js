@@ -216,12 +216,12 @@ export default function MatchScreen({ navigation }) {
           action: 'like',
           userId: userId,
           itemId: product.itemId,
-          itemType: 'item', // Ensure itemType is included
+          itemType: 'item',
           imageUrl: product.imageUrl,
           productName: product.productName,
           designerName: product.designerName,
           productPrice: product.productPrice,
-          productUrl: product.productUrl, // Ensure productUrl is included
+          productUrl: product.productUrl, 
         },
         {
           headers: { 'Content-Type': 'application/json' },
@@ -484,7 +484,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  // Styles for Popup Notification
   popup: {
     position: 'absolute',
     alignSelf: 'center',

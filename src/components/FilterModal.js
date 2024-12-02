@@ -8,6 +8,8 @@ import {
   Modal,
   FlatList,
   Alert,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
 import { theme } from '../styles/Theme';
 
@@ -26,7 +28,7 @@ export default function FilterModal({
   selectedFootwears = [],
   setSelectedFootwears,
   isNew,
-  setIsNew
+  setIsNew,
 }) {
   const [tempMinPrice, setTempMinPrice] = useState(minPrice);
   const [tempMaxPrice, setTempMaxPrice] = useState(maxPrice);
@@ -66,26 +68,26 @@ export default function FilterModal({
   };
 
   const handleApplyFilters = () => {
-    console.log("tempIsNew before applying filters:", tempIsNew);
+    console.log('tempIsNew before applying filters:', tempIsNew);
     if (tempMinPrice !== '' || tempMaxPrice !== '') {
       const minPrice = parseFloat(tempMinPrice);
       const maxPrice = parseFloat(tempMaxPrice);
 
       if (!isNaN(minPrice) && minPrice < 0) {
-        Alert.alert("Invalid Minimum Price", "Minimum price must be greater than or equal to 0.");
+        Alert.alert('Invalid Minimum Price', 'Minimum price must be greater than or equal to 0.');
         return;
       }
 
       if (!isNaN(minPrice) && !isNaN(maxPrice) && maxPrice <= minPrice) {
         Alert.alert(
-          "Invalid Maximum Price",
-          "Maximum price must be greater than the minimum price."
+          'Invalid Maximum Price',
+          'Maximum price must be greater than the minimum price.'
         );
         return;
       }
 
       if (isNaN(minPrice) || isNaN(maxPrice)) {
-        Alert.alert("Invalid Input", "Please enter valid numeric values for the prices.");
+        Alert.alert('Invalid Input', 'Please enter valid numeric values for the prices.');
         return;
       }
     }
@@ -109,13 +111,13 @@ export default function FilterModal({
     setTempSelectedBottoms([]);
     setTempSelectedFootwears([]);
     setTempIsNew(false);
-  
+
     setShowDropdown(null);
   };
 
   const handleCloseModal = () => {
     setShowDropdown(null);
-    onClose(); 
+    onClose();
   };
 
   const renderDropdownItem = (options, selectedArray, setArray) => (
@@ -127,11 +129,14 @@ export default function FilterModal({
           style={styles.dropdownItem}
           onPress={() => toggleSelection(selectedArray, setArray, item)}
         >
-          <Text style={selectedArray.includes(item) ? styles.selectedItem : styles.unselectedItem}>
+          <Text
+            style={selectedArray.includes(item) ? styles.selectedItem : styles.unselectedItem}
+          >
             {item}
           </Text>
         </TouchableOpacity>
       )}
+      nestedScrollEnabled={true}
     />
   );
 
@@ -156,8 +161,16 @@ export default function FilterModal({
   );
 
   return (
-    <Modal visible={visible} transparent={true} animationType="slide" onRequestClose={handleCloseModal}>
-      <View style={styles.modalOverlay}>
+    <Modal
+      visible={visible}
+      transparent={true}
+      animationType="slide"
+      onRequestClose={handleCloseModal}
+    >
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        style={styles.modalOverlay}
+      >
         <View style={styles.filterPanel}>
           <View style={styles.header}>
             <TouchableOpacity onPress={handleCloseModal} style={styles.closeButton}>
@@ -179,9 +192,27 @@ export default function FilterModal({
             </TouchableOpacity>
           </View>
 
-          {renderDropdown('Tops', ['Tops', 'Sweaters & Knits'], tempSelectedTops, setTempSelectedTops, 'tops')}
-          {renderDropdown('Bottoms', ['Jeans', 'Skirts', 'Pants', 'Shorts'], tempSelectedBottoms, setTempSelectedBottoms, 'bottoms')}
-          {renderDropdown('Footwear', footwearCategories, tempSelectedFootwears, setTempSelectedFootwears, 'footwear')}
+          {renderDropdown(
+            'Tops',
+            ['Tops', 'Sweaters & Knits'],
+            tempSelectedTops,
+            setTempSelectedTops,
+            'tops'
+          )}
+          {renderDropdown(
+            'Bottoms',
+            ['Jeans', 'Skirts', 'Pants', 'Shorts'],
+            tempSelectedBottoms,
+            setTempSelectedBottoms,
+            'bottoms'
+          )}
+          {renderDropdown(
+            'Footwear',
+            footwearCategories,
+            tempSelectedFootwears,
+            setTempSelectedFootwears,
+            'footwear'
+          )}
 
           <Text style={[styles.filterLabel, styles.priceTitle]}>Price</Text>
           <View style={styles.priceInputs}>
@@ -205,7 +236,7 @@ export default function FilterModal({
             <Text style={styles.applyButtonText}>Apply Filters</Text>
           </TouchableOpacity>
         </View>
-      </View>
+      </KeyboardAvoidingView>
     </Modal>
   );
 }
