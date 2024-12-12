@@ -9,22 +9,22 @@ A Tinder-style fashion matching app where users can swipe to like or dislike out
 - **React Navigation**
 - **AWS**
 - **Python**
+- **Jira**
 
 ## Installation
 1. Clone the repository:
 ```bash
-   git clone https://github.com/mihika-vuppula/StyleSwipe
+git clone https://github.com/mihika-vuppula/StyleSwipe
 ```
 
 2. Navigate into the project directory and install dependencies:
 ```bash
-  cd shopbop-outfit-matcher
+  cd StyleSwipe
   npm install
 ```
 
 3. Start the app:
 ```bash
-  Copy code
   expo start
 ```
 
@@ -44,13 +44,17 @@ Redirect to store: Click on an item to go directly to the product page on Shopbo
 Backend integration with Shopbop API: Fetch real-time data from Shopbop’s catalog to ensure up-to-date product information.
 
 ## Future Improvements
-Expand Matching Options: Add support for matching sets, dresses, accessories, and outerwear.
+Disliked items may reappear and basic data persistence
 
 Social Feed for Matches: Enable users to share their matches with others and view popular outfit combinations in a feed.
 
 Intelligent Outfit Recommendations: Use machine learning to recommend outfits based on user preferences and past swipes.
 
 ## Contributing
+Follow Agile practices:
+Daily standups and sprint planning
+Use Jira for task tracking
+
 Pull requests are welcome. Please open an issue to discuss any changes.
 
 Every developer should create their own feature branch from main:
