@@ -3,7 +3,7 @@
 ## Project Description
 A Tinder-style fashion matching app where users can swipe to like or dislike outfits from Shopbop’s catalog. The goal is to help users discover and match outfits effortlessly, allowing them to view, save, and share their favorite combinations.
 
-###Link to repositary:
+### Link to repositary:
 https://github.com/mihika-vuppula/StyleSwipe
 
 ## Technologies Used
